@@ -22,7 +22,7 @@ namespace KingAnswerServer
             var cmd = "shell dumpsys window displays";
             var str = await adb.ExecAsync(cmd);
 
-            var match = Regex.Match(str, @"init=(?<w>\d+)x(?<h>\d+)");
+            var match = Regex.Match(str, @"app=(?<w>\d+)x(?<h>\d+)");
             if (match.Success == true)
             {
                 var w = int.Parse(match.Groups["w"].Value);

@@ -40,7 +40,6 @@ namespace KingAnswerServer
                     return false;
                 }
                 await this.SearchQuestionAsync(question);
-                return true;
             }
             else if (requestUrl.Contains("question/bat/choose") == true)
             {
@@ -54,7 +53,12 @@ namespace KingAnswerServer
                     Console.WriteLine();
                 }
             }
-            return false;
+            else if (requestUrl.Contains("question/bat/fightResult") == true)
+            {
+                await this.AutotapOptionsAsync(2, TimeSpan.FromSeconds(6d));
+                await this.AutotapOptionsAsync(4, TimeSpan.FromSeconds(5d));
+            }
+            return true;
         }
 
         /// <summary>
@@ -96,12 +100,11 @@ namespace KingAnswerServer
         }
 
         /// <summary>
-        /// 自动点击
-        /// 这里要根据设备来调节
-        /// 现在是硬编码
+        /// 自动点击     
         /// </summary>
-        /// <param name="optIndex"></param>
-        /// <param name="delay"></param>
+        /// <param name="optIndex">选项索引</param>
+        /// <param name="delay">延时</param>
+        /// <param name="delays">再点击延时</param>
         /// <returns></returns>
         private async Task AutotapOptionsAsync(int optIndex, TimeSpan delay, params TimeSpan[] delays)
         {
@@ -112,9 +115,9 @@ namespace KingAnswerServer
             }
 
             var x = size.Width / 2f;
-            var uY = size.Height - 1095f;
-            var buttonH = 1095f / 5f;
-            var y = uY + buttonH * optIndex + buttonH / 4f;
+            var uY = size.Height * 0.47f;
+            var optionH = size.Height * 0.53f / 5f;
+            var y = uY + optionH * optIndex + optionH / 3f;
 
             if (delay > TimeSpan.Zero)
             {
