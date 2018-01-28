@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{B2DD26B2-3411-42F5-9360-D8D2803496E9}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>KingAnswerServer</RootNamespace>
-    <AssemblyName>KingAnswerServer</AssemblyName>
+    <RootNamespace>KingAnswerClient</RootNamespace>
+    <AssemblyName>KingAnswerClient</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

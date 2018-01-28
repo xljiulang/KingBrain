@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KingQuestionProxy", "KingQuestionProxy\KingQuestionProxy.csproj", "{DA3EE7FD-4E57-44BE-80D6-DCACE3311B8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KingAnswerServer", "KingAnswerServer\KingAnswerServer.csproj", "{B2DD26B2-3411-42F5-9360-D8D2803496E9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KingAnswerClient", "KingAnswerClient\KingAnswerClient.csproj", "{B2DD26B2-3411-42F5-9360-D8D2803496E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
