@@ -117,7 +117,7 @@ namespace KingAnswerServer
             var x = size.Width / 2f;
             var uY = size.Height * 0.47f;
             var optionH = size.Height * 0.53f / 5f;
-            var y = uY + optionH * optIndex + optionH / 3f;
+            var y = uY + optionH * optIndex + optionH / 2f;
 
             if (delay > TimeSpan.Zero)
             {
