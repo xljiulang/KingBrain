@@ -11,6 +11,13 @@ namespace KingQuestionProxy
 {
     class WebsocketMiddleware : NetworkSocket.WebSocket.WebSocketMiddlewareBase
     {
+        protected override void OnSetProtocolWrapper(ISession session, WebSocketSession wrapper)
+        {
+            var ipAddress = (session.RemoteEndPoint as IPEndPoint).Address.ToString();
+            session.Tag.Set("ip", ipAddress);
+
+            base.OnSetProtocolWrapper(session, wrapper);
+        }
         protected override void OnText(IContenxt context, FrameRequest frame)
         {
             var ipAddress = Encoding.UTF8.GetString(frame.Content);
