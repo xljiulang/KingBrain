@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>KingQuestionProxy</title>
+</head>
+<body>
+    <div>
+        <p>
+            <span>1、</span><a id="cer" download="game.cer">点击下载安装证书</a>
+        </p>
+        <p>
+            <span> 2、给手机wifi设置代理：</span><span id="hostname"></span><span>:5533</span>
+        </p>
+        <p>
+            <span>3、开启KingAnswerServer，开始头脑王者吧</span>
+        </p>
+    </div>
+    <script>
+        window.onload = function () {
+            document.getElementById('hostname').innerHTML = location.hostname;
+            document.getElementById('cer').href = 'http://' + location.hostname + ':5533/FiddlerRoot.cer';
+        }
+    </script>
+</body>
+</html>

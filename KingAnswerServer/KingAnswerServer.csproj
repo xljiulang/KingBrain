@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>KingAnswerServer</RootNamespace>
     <AssemblyName>KingAnswerServer</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -31,13 +31,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
-    <Reference Include="CsQuery, Version=1.3.3.249, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CsQuery.1.3.4\lib\net40\CsQuery.dll</HintPath>
-    </Reference>
     <Reference Include="NetworkSocket, Version=1.7.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\NetworkSocket.1.7.2\lib\net45\NetworkSocket.dll</HintPath>
     </Reference>
@@ -59,25 +54,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="adb.cs" />
-    <Compile Include="SearchResult.cs" />
-    <Compile Include="SerarcherBase.cs" />
+    <Compile Include="KingWebsocketClient.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QuestionController.cs" />
-    <Compile Include="Serarchers\BaiduSearcher.cs" />
+    <Compile Include="SearchResult.cs" />
+    <Compile Include="WsCmd.cs" />
+    <Compile Include="WsGameAnswer.cs" />
+    <Compile Include="WsNotifyData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="app.manifest">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\KingQuestion\KingQuestion.csproj">
-      <Project>{5556025d-685c-4c3e-b1f3-b30b076fc00e}</Project>
-      <Name>KingQuestion</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

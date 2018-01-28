@@ -9,10 +9,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Configuration;
-using KingQuestion;
 using WebApiClient;
 using System.Net.Http;
 using Topshelf;
+using System.Diagnostics;
 
 namespace KingQuestionProxy
 {
@@ -20,16 +20,16 @@ namespace KingQuestionProxy
     {
         private static readonly int proxyPort = int.Parse(ConfigurationManager.AppSettings["ProxyPort"]);
 
-        private static readonly Uri sslAddress = new Uri(ConfigurationManager.AppSettings["SslProxyAddress"]);
-
-        private static readonly string answerServer = ConfigurationManager.AppSettings["AnswerService"];
-
-        private static readonly IAnswerApi answerApi = HttpApiClient.Create<IAnswerApi>(answerServer);
+        private static readonly Uri sslAddress = new Uri(ConfigurationManager.AppSettings["SslProxyAddress"]); 
 
         private static Proxy sslProxyServer;
 
         public bool Stop(HostControl hostControl)
         {
+            HistoryDataTable.Save();
+            KingProcesser.CloseListener();
+            Debugger.Log(0, null, "Save HistoryDataTable Datas OK ..");
+
             if (sslProxyServer != null)
             {
                 sslProxyServer.Dispose();
@@ -40,6 +40,7 @@ namespace KingQuestionProxy
 
         public bool Start(HostControl hostControl)
         {
+            KingProcesser.Init();
             CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
             FiddlerApplication.BeforeRequest += (session) =>
@@ -54,13 +55,9 @@ namespace KingQuestionProxy
             };
 
             // 收到服务端的回复
-            FiddlerApplication.BeforeResponse += async (session) =>
+            FiddlerApplication.BeforeResponse += (session) =>
             {
-                session.utilDecodeResponse();
-                var content = new ByteArrayContent(session.responseBodyBytes);
-
-                await answerApi.SendQuestionAsync(session.fullUrl, content)
-                    .HandleAsDefaultWhenException(ex => Console.WriteLine(ex.Message));
+                KingProcesser.ProcessSessionAsync(session);
             };
 
             // 配置代理服务器

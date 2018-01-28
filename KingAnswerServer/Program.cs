@@ -1,27 +1,52 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using KingAnswerServer.Serarchers;
-using KingQuestion;
-using NetworkSocket;
-using NetworkSocket.Http;
-using Newtonsoft.Json;
+using System.Configuration;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
 
 namespace KingAnswerServer
 {
     class Program
     {
-        private static readonly TcpListener httpServer = new TcpListener();
+        private static readonly Uri proxyServer = new Uri(ConfigurationManager.AppSettings["proxyServer"]);
+
+        private static KingWebsocketClient client = new KingWebsocketClient(proxyServer);
 
         static void Main(string[] args)
-        { 
-            httpServer.Use<HttpMiddleware>();
-            httpServer.Start(5544);
-            Console.Read();
+        {
+            Console.WriteLine("正在连接到服务器...");
+            var state = client.Connect();
+            Console.WriteLine($"连接状态：{state}");
+            if (state != SocketError.Success)
+            {
+                return;
+            }
+
+            while (true)
+            {
+                Console.WriteLine("请输入手机使用的IP：");
+
+                IPAddress ip;
+                var ipAddress = Console.ReadLine();
+                if (IPAddress.TryParse(ipAddress, out ip) == false)
+                {
+                    Console.WriteLine("IP格式错误");
+                    continue;
+                }
+                else
+                {
+                    client.BindIpAddress(ip);
+                    break;
+                }
+            }
+
+            Console.WriteLine("现在可以进行手机游戏了");
+            Console.WriteLine();
+
+            while (true)
+            {
+                Console.Read();
+            }
         }
     }
 }
