@@ -3,6 +3,7 @@ using KingQuestion;
 using NetworkSocket.Http;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,11 @@ namespace KingAnswerServer
         /// 最近一次搜索结果
         /// </summary>
         private static SearchResult searchResult;
+
+        /// <summary>
+        /// 自动开始
+        /// </summary>
+        private static readonly bool autoRestart = ConfigurationManager.AppSettings["autoRestart"] == "true";
 
         /// <summary>
         /// 用于接收代理服务器转发的数据
@@ -53,11 +59,13 @@ namespace KingAnswerServer
                     Console.WriteLine();
                 }
             }
-            else if (requestUrl.Contains("question/bat/fightResult") == true)
+            else if (autoRestart && requestUrl.Contains("question/bat/fightResult") == true)
             {
                 await this.AutotapOptionsAsync(2, TimeSpan.FromSeconds(8d));
+                await this.AutotapOptionsAsync(2, TimeSpan.FromSeconds(0.5d));
+
                 await this.AutotapOptionsAsync(4, TimeSpan.FromSeconds(5d));
-                await this.AutotapOptionsAsync(3, TimeSpan.FromSeconds(1d));
+                await this.AutotapOptionsAsync(3, TimeSpan.FromSeconds(0.5d));
             }
             return true;
         }
@@ -122,7 +130,7 @@ namespace KingAnswerServer
 
             if (delay > TimeSpan.Zero)
             {
-                Console.WriteLine("{0}秒后自动选择答案...", delay.TotalSeconds.ToString("0.0"));
+                Console.WriteLine("{0}秒后自动模拟点击...", delay.TotalSeconds.ToString("0.0"));
                 await Task.Delay(delay);
             }
             await adb.KeyeventAsync((int)x, (int)y);
