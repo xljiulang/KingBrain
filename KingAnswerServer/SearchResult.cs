@@ -33,7 +33,7 @@ namespace KingAnswerServer
             var json = File.ReadAllText(file, Encoding.UTF8);
             return JsonConvert.DeserializeObject<SearchResult>(json);
         }
- 
+
 
         private static string GetFilePath(string title)
         {
@@ -74,7 +74,7 @@ namespace KingAnswerServer
             {
                 builder.AppendLine($"{a++} {item}");
             }
-            builder.Append("最佳答案：").Append(this.Best == null ? "<NULL>" : this.Best.Options);
+            builder.Append("最佳答案：").Append(this.Best == null ? "<NULL>" : ((char)('A' + this.Best.Index)).ToString());
             return builder.ToString();
         }
     }

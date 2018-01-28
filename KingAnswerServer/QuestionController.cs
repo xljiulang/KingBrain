@@ -55,8 +55,9 @@ namespace KingAnswerServer
             }
             else if (requestUrl.Contains("question/bat/fightResult") == true)
             {
-                await this.AutotapOptionsAsync(2, TimeSpan.FromSeconds(6d));
+                await this.AutotapOptionsAsync(2, TimeSpan.FromSeconds(8d));
                 await this.AutotapOptionsAsync(4, TimeSpan.FromSeconds(5d));
+                await this.AutotapOptionsAsync(3, TimeSpan.FromSeconds(1d));
             }
             return true;
         }
