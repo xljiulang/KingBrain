@@ -69,5 +69,13 @@ namespace KingQuestionProxy
             var html = Razor.Parse(cshtml, model);
             return Content(html);
         }
+
+        [HttpGet]
+        [Route("/Data")]
+        public ActionResult Data()
+        {
+            HistoryDataTable.Save();
+            return File("data.json", "application/octet-stream");
+        }
     }
 }
