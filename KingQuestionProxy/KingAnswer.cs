@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +7,21 @@ using System.Threading.Tasks;
 
 namespace KingQuestionProxy
 {
+    /// <summary>
+    /// 表示王者答案
+    /// </summary>
     public class KingAnswer
     {
+        /// <summary>
+        /// 答案数据
+        /// </summary>
+        public KingAnswerData data { get; set; }
+
+        /// <summary>
+        /// 错误码
+        /// </summary>
+        public int errcode { get; set; }
+
         /// <summary>
         /// 从json转换为Answer
         /// </summary>
@@ -15,13 +29,13 @@ namespace KingQuestionProxy
         /// <returns></returns>
         public static KingAnswer Parse(string json)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<KingAnswer>(json);
+            return JsonConvert.DeserializeObject<KingAnswer>(json);
         }
-
-        public KingAnswerData data { get; set; }
-        public int errcode { get; set; }
     }
 
+    /// <summary>
+    /// 答案数据
+    /// </summary>
     public class KingAnswerData
     {
         public int uid { get; set; }

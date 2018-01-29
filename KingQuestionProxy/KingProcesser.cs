@@ -10,16 +10,28 @@ using NetworkSocket.WebSocket;
 using Newtonsoft.Json;
 using System.Net;
 using System.Configuration;
+using System.Diagnostics;
 
 namespace KingQuestionProxy
 {
+    /// <summary>
+    /// 王者数据处理器
+    /// </summary>
     static class KingProcesser
     {
+        /// <summary>
+        /// http和ws监听器
+        /// </summary>
         private static readonly TcpListener listener = new TcpListener();
 
+        /// <summary>
+        /// http和ws商品
+        /// </summary>
         private static readonly int wsPort = int.Parse(ConfigurationManager.AppSettings["WsPort"]);
 
-
+        /// <summary>
+        /// 王者数据处理器
+        /// </summary>
         static KingProcesser()
         {
             listener.Use<HttpMiddleware>();
@@ -27,19 +39,25 @@ namespace KingQuestionProxy
             listener.Start(wsPort);
         }
 
+        /// <summary>
+        /// 显式初始化
+        /// </summary>
         public static void Init()
         {
         }
 
+        /// <summary>
+        /// 关闭监听器
+        /// </summary>
         public static void CloseListener()
         {
             listener.Dispose();
         }
 
         /// <summary>
-        /// 用于接收代理服务器转发的数据
+        /// 处理会话
         /// </summary>
-        /// <param name="requestUrl">请求地址</param>
+        /// <param name="session">会话</param>
         /// <returns></returns>
 
         public static async void ProcessSessionAsync(Session session)
@@ -61,9 +79,10 @@ namespace KingQuestionProxy
         }
 
         /// <summary>
-        /// 找答案并打印
+        /// 从本地和网络查找答案
+        /// 并转发给对应的ws客户端
         /// </summary>
-        /// <param name="question">问题</param>
+        /// <param name="session">会话</param>
         /// <returns></returns>
         private static async Task SearchAnswerAsync(Session session)
         {
@@ -109,6 +128,11 @@ namespace KingQuestionProxy
             WsNotifyByClientIP(notifyData, session.clientIP);
         }
 
+        /// <summary>
+        /// 发送答案给ws客户端
+        /// </summary>
+        /// <param name="notifyData">数据内容</param>
+        /// <param name="clientIp">客户端ip</param>
         private static void WsNotifyByClientIP(IWsNotifyData notifyData, string clientIp)
         {
             var jsonResult = notifyData.ToJson();
@@ -119,8 +143,7 @@ namespace KingQuestionProxy
                 try
                 {
                     var ip = ws.Tag.Get("ip").ToString();
-                    Console.WriteLine(ip);
-
+                    Debugger.Log(0, null, $"转发数据到{ip}");
                     if (clientIp == ip || clientIp.Contains(ip))
                     {
                         ws.SendText(jsonResult);
@@ -133,6 +156,10 @@ namespace KingQuestionProxy
             }
         }
 
+        /// <summary>
+        /// 更新最佳选项并保存
+        /// </summary>
+        /// <param name="session"></param>
         private static void UpdateBestAndSave(Session session)
         {
             session.utilDecodeRequest();

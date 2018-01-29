@@ -9,6 +9,9 @@ using System.IO;
 
 namespace KingQuestionProxy
 {
+    /// <summary>
+    /// 提供历史数据查询和保存
+    /// </summary>
     static class HistoryDataTable
     {
         private static readonly object syncRoot = new object();
@@ -17,6 +20,9 @@ namespace KingQuestionProxy
 
         private static readonly Dictionary<int, HistoryData> dictionary = new Dictionary<int, HistoryData>();
 
+        /// <summary>
+        /// 从文件加载
+        /// </summary>
         static HistoryDataTable()
         {
             if (File.Exists(dataFile))
@@ -31,6 +37,9 @@ namespace KingQuestionProxy
             }
         }
 
+        /// <summary>
+        /// 保存到文件中
+        /// </summary>
         public static void Save()
         {
             lock (syncRoot)
@@ -40,6 +49,11 @@ namespace KingQuestionProxy
             }
         }
 
+        /// <summary>
+        /// 通过问题标题获取历史数据
+        /// </summary>
+        /// <param name="title">问题标题</param>
+        /// <returns></returns>
         public static HistoryData TryGet(string title)
         {
             lock (syncRoot)
@@ -51,6 +65,11 @@ namespace KingQuestionProxy
             }
         }
 
+        /// <summary>
+        /// 通过请求体内容获取获取历史数据
+        /// </summary>
+        /// <param name="request">请求体内容获</param>
+        /// <returns></returns>
         public static HistoryData TryGet(KingRequest request)
         {
             lock (syncRoot)
@@ -59,6 +78,11 @@ namespace KingQuestionProxy
             }
         }
 
+        /// <summary>
+        /// 添加历史数据
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static bool TryAdd(HistoryData data)
         {
             lock (syncRoot)

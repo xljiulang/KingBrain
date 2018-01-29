@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace KingAnswerClient
 {
+    /// <summary>
+    /// 表示ws客户端
+    /// </summary>
     class KingWebsocketClient : WebSocketClient
     {
         public KingWebsocketClient(Uri address)
@@ -16,11 +19,19 @@ namespace KingAnswerClient
         {
         }
 
+        /// <summary>
+        /// 绑定手机的ip地址
+        /// </summary>
+        /// <param name="ipAddress">手机的ip地址</param>
         public void BindIpAddress(IPAddress ipAddress)
         {
             this.SendText(ipAddress.ToString());
         }
 
+        /// <summary>
+        /// 收到服务端的数据
+        /// </summary>
+        /// <param name="frame"></param>
         protected override async void OnText(FrameRequest frame)
         {
             var json = Encoding.UTF8.GetString(frame.Content);

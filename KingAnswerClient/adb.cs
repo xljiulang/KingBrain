@@ -11,12 +11,28 @@ using System.Threading.Tasks;
 
 namespace KingAnswerClient
 {
+    /// <summary>
+    /// 提供adb的包装
+    /// </summary>
     public static class adb
     {
         private static readonly string adbFile = ConfigurationManager.AppSettings["adb"];
 
-        public static readonly bool IsSupported = File.Exists(adbFile);
+        /// <summary>
+        /// 获取是否支持
+        /// </summary>
+        public static bool IsSupported
+        {
+            get
+            {
+                return File.Exists(adbFile);
+            }
+        }
 
+        /// <summary>
+        /// 获取游戏画面大小
+        /// </summary>
+        /// <returns></returns>
         public async static Task<SizeF> GetSizeAsync()
         {
             var cmd = "shell dumpsys window displays";
@@ -32,12 +48,24 @@ namespace KingAnswerClient
             return SizeF.Empty;
         }
 
+
+        /// <summary>
+        /// 模拟点击
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         public static async Task KeyeventAsync(int x, int y)
         {
             var cmd = $"shell input tap {x} {y}";
             await adb.ExecAsync(cmd);
         }
 
+        /// <summary>
+        /// 执行shell
+        /// </summary>
+        /// <param name="arg">参数</param>
+        /// <returns></returns>
         private static async Task<string> ExecAsync(string arg)
         {
             if (IsSupported == false)

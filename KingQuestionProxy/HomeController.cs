@@ -7,8 +7,15 @@ using System.Threading.Tasks;
 
 namespace KingQuestionProxy
 {
-    public class HomeController : NetworkSocket.Http.HttpController
+    /// <summary>
+    /// Http服务
+    /// </summary>
+    public class HomeController : HttpController
     {
+        /// <summary>
+        /// 首页
+        /// </summary>
+        /// <returns></returns>
         [Route("/")]
         public ActionResult Index()
         {

@@ -16,14 +16,31 @@ using System.Diagnostics;
 
 namespace KingQuestionProxy
 {
+    /// <summary>
+    /// 表示Fiddler应用
+    /// </summary>
     public class FiddlerApp : Topshelf.ServiceControl
     {
+        /// <summary>
+        /// 代理端口
+        /// </summary>
         private static readonly int proxyPort = int.Parse(ConfigurationManager.AppSettings["ProxyPort"]);
 
-        private static readonly Uri sslAddress = new Uri(ConfigurationManager.AppSettings["SslProxyAddress"]); 
+        /// <summary>
+        /// SSL代理中转服务地址
+        /// </summary>
+        private static readonly Uri sslAddress = new Uri(ConfigurationManager.AppSettings["SslProxyAddress"]);
 
+        /// <summary>
+        /// SSL代理服务
+        /// </summary>
         private static Proxy sslProxyServer;
 
+        /// <summary>
+        /// 停止服务 
+        /// </summary>
+        /// <param name="hostControl"></param>
+        /// <returns></returns>
         public bool Stop(HostControl hostControl)
         {
             HistoryDataTable.Save();
@@ -38,6 +55,11 @@ namespace KingQuestionProxy
             return true;
         }
 
+        /// <summary>
+        /// 启动服务
+        /// </summary>
+        /// <param name="hostControl"></param>
+        /// <returns></returns>
         public bool Start(HostControl hostControl)
         {
             KingProcesser.Init();
