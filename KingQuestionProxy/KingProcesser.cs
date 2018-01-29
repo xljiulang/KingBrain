@@ -101,27 +101,28 @@ namespace KingQuestionProxy
             var title = kingQuestion.data.quiz;
             var beginTime = DateTime.Now;
             var data = HistoryDataTable.TryGet(title);
+
             if (data == null)
             {
-                var searchResult = await BaiduSearcher.SearchAsync(kingQuestion);
                 data = new HistoryData
                 {
-                    SearchResult = searchResult,
                     QuestionData = kingQuestion.data,
-                    KingRequest = KingRequest.Parse(requestBody)
+                    KingRequest = KingRequest.Parse(requestBody),
+                    SearchResult = await BaiduSearcher.SearchAsync(kingQuestion)
                 };
                 HistoryDataTable.TryAdd(data);
             }
 
             const double offsetSecondes = 3.7d;
             var delay = beginTime.AddSeconds(offsetSecondes).Subtract(DateTime.Now);
+            var searchResult = data.SearchResult.CreateNewByQuestionData(kingQuestion.data);
 
             var notifyData = new WsNotifyData<WsGameAnswer>
             {
                 Cmd = WsCmd.GameAnser,
                 Data = new WsGameAnswer
                 {
-                    SearchResult = data.SearchResult,
+                    SearchResult = searchResult,
                     GameDelayMSeconds = (int)delay.TotalMilliseconds
                 }
             };

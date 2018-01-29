@@ -29,6 +29,49 @@ namespace KingQuestionProxy
         public OptionMatchs Best { get; set; }
 
         /// <summary>
+        /// 以问题来创建新的结果
+        /// 新结果返回给客户端
+        /// </summary>
+        /// <param name="questionData">问题数据</param>
+        /// <returns></returns>
+        public SearchResult CreateNewByQuestionData(KingQuestionData questionData)
+        {
+            // 各个选项和结论的匹配次数
+            var options = questionData.options.Select((opt, i) => new OptionMatchs
+            {
+                Index = i,
+                Options = opt,
+                Matchs = this.FindMatchsByOptions(opt)
+            }).ToArray();
+
+
+            var best = default(OptionMatchs);
+            if (this.Best != null)
+            {
+                best = options.FirstOrDefault(item => item.Options == this.Best.Options);
+            }
+
+            return new SearchResult
+            {
+                Title = this.Title,
+                Options = options,
+                Best = best
+            };
+        }
+
+        private int FindMatchsByOptions(string options)
+        {
+            var om = this.Options.FirstOrDefault(item => item.Options == options);
+            if (om == null)
+            {
+                return 0;
+            }
+            return om.Matchs;
+        }
+
+
+
+        /// <summary>
         /// 转换为字符串
         /// </summary>
         /// <returns></returns>
