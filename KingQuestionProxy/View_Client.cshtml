@@ -33,9 +33,11 @@
                 url: '/gethtml',
                 data: data,
                 contentType: "application/json; charset=utf-8",
-                dataType: "json",
+                dataType: "text",
                 success: function (html) {
                     $('body').append(html);
+                    var h = $(document).height() - $(window).height();
+                    $(document).scrollTop(h);
                 }
             });
         };
