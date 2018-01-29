@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -14,6 +15,15 @@ namespace KingAnswerClient
     /// </summary>
     class KingClient : WebSocketClient
     {
+        /// <summary>
+        /// 是否自动游戏
+        /// </summary>
+        private readonly bool autoContinue = ConfigurationManager.AppSettings["autoContinue"] == "true";
+
+        /// <summary>
+        /// ws客户端
+        /// </summary>
+        /// <param name="address"></param>
         public KingClient(Uri address)
             : base(address)
         {
@@ -49,6 +59,11 @@ namespace KingAnswerClient
                     await this.AutotapOptionsAsync(index, delay, TimeSpan.FromSeconds(0.5d));
                 }
                 Console.WriteLine();
+            }
+            else if (notify.Cmd == WsCmd.GameOver && this.autoContinue == true)
+            {
+                await this.AutotapOptionsAsync(2, TimeSpan.FromSeconds(6d));
+                await this.AutotapOptionsAsync(4, TimeSpan.FromSeconds(5d));
             }
         }
 
