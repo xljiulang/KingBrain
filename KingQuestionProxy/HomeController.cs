@@ -29,14 +29,12 @@ namespace KingQuestionProxy
             var model = new IndexModel
             {
                 cerhref = $"http://{this.Request.Url.Host}:{proxyPort}/fiddlerRoot.cer",
-                proxyIpEndpoint = $"{this.Request.Url.Host}:{proxyPort}",
-                clientIpAddress = (this.Request.RemoteEndPoint as IPEndPoint).Address.ToString()
+                proxyIpEndpoint = $"{this.Request.Url.Host}:{proxyPort}"              
             };
 
             var html = System.IO.File.ReadAllText("index.html", Encoding.UTF8)
                    .Replace("@cerhref", model.cerhref)
-                   .Replace("@proxyIpEndpoint", model.proxyIpEndpoint)
-                   .Replace("@clientIpAddress", model.clientIpAddress);
+                   .Replace("@proxyIpEndpoint", model.proxyIpEndpoint);
 
             return Content(html);
         }
