@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,13 +26,18 @@ namespace KingQuestionProxy
         [Route("/")]
         public ActionResult Index()
         {
-            var html = System.IO.File.ReadAllText("index.html", Encoding.UTF8);
             var model = new IndexModel
             {
                 cerhref = $"http://{this.Request.Url.Host}:{proxyPort}/fiddlerRoot.cer",
-                proxyIpEndpoint = $"{this.Request.Url.Host}:{proxyPort}"
+                proxyIpEndpoint = $"{this.Request.Url.Host}:{proxyPort}",
+                clientIpAddress = (this.Request.RemoteEndPoint as IPEndPoint).Address.ToString()
             };
-            html = html.Replace("@cerhref", model.cerhref).Replace("@proxyIpEndpoint", model.proxyIpEndpoint);
+
+            var html = System.IO.File.ReadAllText("index.html", Encoding.UTF8)
+                   .Replace("@cerhref", model.cerhref)
+                   .Replace("@proxyIpEndpoint", model.proxyIpEndpoint)
+                   .Replace("@clientIpAddress", model.clientIpAddress);
+
             return Content(html);
         }
     }

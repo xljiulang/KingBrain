@@ -10,6 +10,8 @@ namespace KingQuestionProxy
     {
         public string cerhref { get; set; }
 
+        public string clientIpAddress { get; set; }
+
         public string proxyIpEndpoint { get; set; }
     }
 }
