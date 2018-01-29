@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace KingQuestionProxy
 {
-    public class IndexModel
+    public  class ClientModel
     {
-        public string CerHref { get; set; }
+        public string IpAddress { get; set; }
 
-        public string ProxyIpEndpoint { get; set; }
+        public string WsServer { get; set; }        
     }
+
 }

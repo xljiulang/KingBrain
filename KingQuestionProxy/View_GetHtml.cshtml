@@ -1,0 +1,18 @@
+﻿<div class="qa">
+    <h4>@Model.Title</h4>
+    <ol>
+        @foreach (var opt in @Model.Options)
+        {
+            <li>@opt.Options [@opt.Matchs]</li>
+        }
+    </ol>
+
+    @if (Model.Best != null)
+    {
+        <h5>最佳答案：@(Model.Best.Index + 1) @Model.Best.Options</h5>
+    }
+    else
+    {
+        <h5>找不到答案 ..</h5>
+    }
+</div>

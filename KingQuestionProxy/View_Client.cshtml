@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>ws client for @Model.IpAddress</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
+    <link href="/bootstrap.min.css" rel="stylesheet" />
+    <script src="/jquery-1.7.1.min.js"></script>
+
+    <style type="text/css">
+        body {
+            padding: 20px;
+        }
+
+        .qa {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 6px;
+        }
+    </style>
+
+    <script>
+        ws = new (window.WebSocket || window.MozWebSocket)('@Model.WsServer');
+        ws.onopen = function (e) {
+            ws.send('@Model.IpAddress');
+        };
+
+        ws.onmessage = function (e) {
+            var data = JSON.stringify(JSON.parse(e.data).Data.SearchResult);
+            $.ajax({
+                type: "post",
+                url: '/gethtml',
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (html) {
+                    $('body').append(html);
+                }
+            });
+        };
+    </script>
+</head>
+
+<body>
+</body>
+</html>
