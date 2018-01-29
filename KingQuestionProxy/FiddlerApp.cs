@@ -37,6 +37,11 @@ namespace KingQuestionProxy
         private static Proxy sslProxyServer;
 
         /// <summary>
+        /// 所有会话的集合
+        /// </summary>
+        public static readonly SessionCollection AllSessions = new SessionCollection();
+
+        /// <summary>
         /// 停止服务 
         /// </summary>
         /// <param name="hostControl"></param>
@@ -68,6 +73,8 @@ namespace KingQuestionProxy
             FiddlerApplication.BeforeRequest += (session) =>
             {
                 session.bBufferResponse = false;
+                AllSessions.Add(session);
+
                 if ((session.oRequest.pipeClient.LocalPort == sslAddress.Port) && (session.hostname == sslAddress.Host))
                 {
                     session.utilCreateResponseAndBypassServer();

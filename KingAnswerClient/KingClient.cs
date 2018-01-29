@@ -58,12 +58,18 @@ namespace KingAnswerClient
                     var delay = TimeSpan.FromMilliseconds(notify.Data.GameDelayMSeconds);
                     await this.AutotapOptionsAsync(index, delay, TimeSpan.FromSeconds(0.5d));
                 }
+                else
+                {
+                    var index = new Random().Next(0, 3);
+                    var delay = TimeSpan.FromMilliseconds(notify.Data.GameDelayMSeconds + 4000);
+                    await this.AutotapOptionsAsync(index, delay);
+                }
                 Console.WriteLine();
             }
             else if (notify.Cmd == WsCmd.GameOver && this.autoContinue == true)
             {
                 await this.AutotapOptionsAsync(2, TimeSpan.FromSeconds(6d));
-                await this.AutotapOptionsAsync(4, TimeSpan.FromSeconds(5d));
+                await this.AutotapOptionsAsync(4, TimeSpan.FromSeconds(4d));
             }
         }
 

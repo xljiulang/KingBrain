@@ -75,6 +75,7 @@ namespace KingQuestionProxy
             {
                 var notifyData = new WsNotifyData<object> { Cmd = WsCmd.GameOver };
                 WsNotifyByClientIP(notifyData, session.clientIP);
+                HistoryDataTable.Save();
             }
         }
 

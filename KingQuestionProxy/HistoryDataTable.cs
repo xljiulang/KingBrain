@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using Newtonsoft.Json;
 using System.IO;
+using NetworkSocket.Http;
 
 namespace KingQuestionProxy
 {
@@ -37,17 +38,26 @@ namespace KingQuestionProxy
             }
         }
 
+
         /// <summary>
-        /// 保存到文件中
+        /// 添加历史数据
         /// </summary>
-        public static void Save()
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static bool TryAdd(HistoryData data)
         {
             lock (syncRoot)
             {
-                var json = JsonConvert.SerializeObject(dictionary.Values.ToArray());
-                File.WriteAllText(dataFile, json, Encoding.UTF8);
+                var key = data.QuestionData.quiz.GetHashCode();
+                if (dictionary.ContainsKey(key) == false)
+                {
+                    dictionary.Add(key, data);
+                    return true;
+                }
+                return false;
             }
         }
+
 
         /// <summary>
         /// 通过问题标题获取历史数据
@@ -78,22 +88,44 @@ namespace KingQuestionProxy
             }
         }
 
+
         /// <summary>
-        /// 添加历史数据
+        /// 保存到文件中
         /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public static bool TryAdd(HistoryData data)
+        public static void Save()
         {
             lock (syncRoot)
             {
-                var key = data.QuestionData.quiz.GetHashCode();
-                if (dictionary.ContainsKey(key) == false)
+                var json = JsonConvert.SerializeObject(dictionary.Values.ToArray());
+                File.WriteAllText(dataFile, json, Encoding.UTF8);
+            }
+        }
+
+        /// <summary>
+        /// 导入json数据
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        public static int TryImport(HttpFile file)
+        {
+            try
+            {
+                var temp = "temp.tmp";
+                File.WriteAllBytes(temp, file.Stream);
+                var json = File.ReadAllText(temp, Encoding.UTF8);
+                File.Delete(temp);
+
+                var datas = JsonConvert.DeserializeObject<HistoryData[]>(json);
+                var count = datas.Select(d => TryAdd(d)).Count(item => item);
+                if (count > 0)
                 {
-                    dictionary.Add(key, data);
-                    return true;
+                    HistoryDataTable.Save();
                 }
-                return false;
+                return count;
+            }
+            catch (Exception)
+            {
+                return 0;
             }
         }
     }
