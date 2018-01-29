@@ -12,9 +12,9 @@ namespace KingAnswerClient
     /// <summary>
     /// 表示ws客户端
     /// </summary>
-    class KingWebsocketClient : WebSocketClient
+    class KingClient : WebSocketClient
     {
-        public KingWebsocketClient(Uri address)
+        public KingClient(Uri address)
             : base(address)
         {
         }

@@ -10,7 +10,7 @@ namespace KingAnswerClient
     {
         private static readonly Uri proxyServer = new Uri(ConfigurationManager.AppSettings["proxyServer"]);
 
-        private static KingWebsocketClient client = new KingWebsocketClient(proxyServer);
+        private static KingClient client = new KingClient(proxyServer);
 
         static void Main(string[] args)
         {
