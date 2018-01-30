@@ -72,7 +72,7 @@ namespace KingQuestionProxy
 
             FiddlerApplication.BeforeRequest += (session) =>
             {
-                session.bBufferResponse = false;
+                session.bBufferResponse = true;
                 AllSessions.Add(session);
 
                 if ((session.oRequest.pipeClient.LocalPort == sslAddress.Port) && (session.hostname == sslAddress.Host))

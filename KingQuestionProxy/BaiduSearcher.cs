@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,11 +24,11 @@ namespace KingQuestionProxy
         /// </summary>
         /// <param name="question">问题</param>
         /// <returns></returns>
-        public static async Task<SearchResult> SearchAsync(KingQuestion question)
+        public static async Task<SearchResult> SearchAsync(KingQuestion question, bool sync)
         {
             // 从badidu找出原始结论
             var title = question.data.quiz;
-            var sourceAnswer = await SearchSourceAnswersAsync(title);
+            var sourceAnswer = sync ? SearchSourceAnswers(title) : await SearchSourceAnswersAsync(title);
 
             // 各个选项和结论的匹配次数
             var options = question.data.options.Select((item, i) => new OptionMatchs
@@ -78,6 +79,33 @@ namespace KingQuestionProxy
         /// </summary>
         /// <param name="question"></param>
         /// <returns></returns>
+        private static string[] SearchSourceAnswers(string question)
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                try
+                {
+                    using (var client = new WebClient())
+                    {
+                        var address = $"http://www.baidu.com/s?ie=utf-8&wd={question}";
+                        var datas = client.DownloadData(address);
+                        return FindAbstracts(datas);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+            return new string[0];
+        }
+
+        /// <summary>
+        /// 找class="c-abstract"的标签的文本
+        /// 就是原始参数答案
+        /// </summary>
+        /// <param name="question"></param>
+        /// <returns></returns>
         private static async Task<string[]> SearchSourceAnswersAsync(string question)
         {
             for (var i = 0; i < 3; i++)
@@ -86,9 +114,7 @@ namespace KingQuestionProxy
                 {
                     var address = $"http://www.baidu.com/s?ie=utf-8&wd={question}";
                     var datas = await httpClient.GetByteArrayAsync(address);
-                    CQ cQ = Encoding.UTF8.GetString(datas);
-                    var abstracts = cQ.Find(".c-abstract").Select(item => item.Cq().Text()).ToArray();
-                    return abstracts;
+                    return FindAbstracts(datas);
                 }
                 catch (Exception ex)
                 {
@@ -96,6 +122,12 @@ namespace KingQuestionProxy
                 }
             }
             return new string[0];
+        }
+
+        private static string[] FindAbstracts(byte[] html)
+        {
+            CQ cQ = Encoding.UTF8.GetString(html);
+            return cQ.Find(".c-abstract").Select(item => item.Cq().Text()).ToArray();
         }
     }
 }
