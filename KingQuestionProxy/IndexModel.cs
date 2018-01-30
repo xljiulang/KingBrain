@@ -8,8 +8,6 @@ namespace KingQuestionProxy
 {
     public class IndexModel
     {
-        public string CerHref { get; set; }
-
         public string ProxyIpEndpoint { get; set; }
 
         public string[] ClientsIp { get; set; }

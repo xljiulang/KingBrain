@@ -27,38 +27,9 @@ namespace KingQuestionProxy
         private static readonly int proxyPort = int.Parse(ConfigurationManager.AppSettings["ProxyPort"]);
 
         /// <summary>
-        /// SSL代理中转服务地址
-        /// </summary>
-        private static readonly Uri sslAddress = new Uri(ConfigurationManager.AppSettings["SslProxyAddress"]);
-
-        /// <summary>
-        /// SSL代理服务
-        /// </summary>
-        private static Proxy sslProxyServer;
-
-        /// <summary>
         /// 所有会话的集合
         /// </summary>
         public static readonly SessionCollection AllSessions = new SessionCollection();
-
-        /// <summary>
-        /// 停止服务 
-        /// </summary>
-        /// <param name="hostControl"></param>
-        /// <returns></returns>
-        public bool Stop(HostControl hostControl)
-        {
-            HistoryDataTable.Save();
-            KingProcesser.CloseListener();
-            Debugger.Log(0, null, "Save HistoryDataTable Datas OK ..");
-
-            if (sslProxyServer != null)
-            {
-                sslProxyServer.Dispose();
-            }
-            FiddlerApplication.Shutdown();
-            return true;
-        }
 
         /// <summary>
         /// 启动服务
@@ -74,13 +45,6 @@ namespace KingQuestionProxy
             {
                 session.bBufferResponse = true;
                 AllSessions.Add(session);
-
-                if ((session.oRequest.pipeClient.LocalPort == sslAddress.Port) && (session.hostname == sslAddress.Host))
-                {
-                    session.utilCreateResponseAndBypassServer();
-                    session.oResponse.headers.SetStatus(200, "Ok");
-                    session.utilSetResponseBody("SSL Proxy OK ..");
-                }
             };
 
             // 收到服务端的回复
@@ -89,16 +53,56 @@ namespace KingQuestionProxy
                 KingProcesser.ProcessSessionAsync(session);
             };
 
+            var e = CertMaker.rootCertExists();
+            var r = CertMaker.GetRootCertificate();
+
             // 配置代理服务器
             CONFIG.IgnoreServerCertErrors = true;
+            FiddlerApp.SetRootCertificate();
+
             FiddlerApplication.Prefs.SetBoolPref("fiddler.network.streaming.abortifclientaborts", true);
             FiddlerApplication.Startup(proxyPort, FiddlerCoreStartupFlags.AllowRemoteClients | FiddlerCoreStartupFlags.DecryptSSL);
 
-            sslProxyServer = FiddlerApplication.CreateProxyEndpoint(sslAddress.Port, true, sslAddress.Host);
-            if (sslProxyServer == null)
+            return true;
+        }
+
+        /// <summary>
+        /// 设置证书
+        /// </summary>
+        private static void SetRootCertificate()
+        {
+            if (File.Exists("proxy.cer") && File.Exists("proxy.key"))
             {
-                Console.WriteLine("创建SSL监听失败");
+                var certString = File.ReadAllText("proxy.cer", Encoding.ASCII);
+                var keyString = File.ReadAllText("proxy.key", Encoding.ASCII);
+
+                FiddlerApplication.Prefs.SetStringPref("fiddler.certmaker.bc.cert", certString);
+                FiddlerApplication.Prefs.SetStringPref("fiddler.certmaker.bc.key", keyString);
             }
+            else
+            {
+                var cert = CertMaker.GetRootCertificate();
+                var clientCer = cert.Export(X509ContentType.Cert);
+                File.WriteAllBytes("client.cer", clientCer);
+
+                var certString = FiddlerApplication.Prefs.GetStringPref("fiddler.certmaker.bc.cert", null);
+                var keyString = FiddlerApplication.Prefs.GetStringPref("fiddler.certmaker.bc.key", null);
+
+                File.WriteAllText("proxy.cer", certString, Encoding.ASCII);
+                File.WriteAllText("proxy.key", keyString, Encoding.ASCII);
+            }
+        }
+
+        /// <summary>
+        /// 停止服务 
+        /// </summary>
+        /// <param name="hostControl"></param>
+        /// <returns></returns>
+        public bool Stop(HostControl hostControl)
+        {
+            HistoryDataTable.Save();
+            KingProcesser.CloseListener();
+            FiddlerApplication.Shutdown();
             return true;
         }
     }

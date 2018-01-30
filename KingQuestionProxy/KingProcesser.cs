@@ -39,7 +39,9 @@ namespace KingQuestionProxy
         /// </summary>
         static KingProcesser()
         {
-            listener.Use<HttpMiddleware>();
+            var http = listener.Use<HttpMiddleware>();
+            http.MIMECollection.Add(".cer", "application/x-x509-ca-cert");
+
             listener.Use<WebsocketMiddleware>();
             listener.Start(wsPort);
         }

@@ -41,7 +41,6 @@ namespace KingQuestionProxy
 
             var model = new IndexModel
             {
-                CerHref = $"http://{this.Request.Url.Host}:{proxyPort}/fiddlerRoot.cer",
                 ProxyIpEndpoint = $"{this.Request.Url.Host}:{proxyPort}",
                 ClientsIp = clientsIp.Distinct().ToArray()
             };
@@ -100,7 +99,7 @@ namespace KingQuestionProxy
             {
                 var file = this.Request.Files.First();
                 if (file.FileName.EndsWith("data.json", StringComparison.OrdinalIgnoreCase))
-                { 
+                {
                     HistoryDataTable.TryImport(file);
                 }
             }
