@@ -25,6 +25,10 @@ namespace KingQuestionProxy
         /// 代理端口
         /// </summary>
         private static readonly int proxyPort = int.Parse(ConfigurationManager.AppSettings["ProxyPort"]);
+        /// <summary>
+        /// ws服务端口
+        /// </summary>
+        private static readonly string wsPort = ConfigurationManager.AppSettings["WsPort"];
 
         /// <summary>
         /// 所有会话的集合
@@ -41,9 +45,18 @@ namespace KingQuestionProxy
             KingProcesser.Init();
             CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
+            // 请求前
             FiddlerApplication.BeforeRequest += (session) =>
             {
+                Console.WriteLine($"{session.clientIP} {session.fullUrl}");
                 session.bBufferResponse = true;
+
+                // 首页重定向
+                var uri = new Uri(session.fullUrl);
+                if (uri.Port == proxyPort)
+                {
+                    session.host = $"{uri.Host}:{wsPort}";
+                }
                 AllSessions.Add(session);
             };
 
@@ -53,8 +66,6 @@ namespace KingQuestionProxy
                 KingProcesser.ProcessSession(session);
             };
 
-            var e = CertMaker.rootCertExists();
-            var r = CertMaker.GetRootCertificate();
 
             // 配置代理服务器
             CONFIG.IgnoreServerCertErrors = true;
