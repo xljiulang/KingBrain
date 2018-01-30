@@ -15,20 +15,15 @@ namespace KingQuestionProxy
     static class BaiduSearcher
     {
         /// <summary>
-        /// http客户端
-        /// </summary>
-        private static readonly HttpClient httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(3d) };
-
-        /// <summary>
-        /// 从正确的答案选项
+        /// 搜索问题
         /// </summary>
         /// <param name="question">问题</param>
         /// <returns></returns>
-        public static async Task<SearchResult> SearchAsync(KingQuestion question, bool sync)
+        public static SearchResult Search(KingQuestion question)
         {
             // 从badidu找出原始结论
             var title = question.data.quiz;
-            var sourceAnswer = sync ? SearchSourceAnswers(title) : await SearchSourceAnswersAsync(title);
+            var sourceAnswer = SearchSourceAnswers(title, trys: 3);
 
             // 各个选项和结论的匹配次数
             var options = question.data.options.Select((item, i) => new OptionMatchs
@@ -78,19 +73,15 @@ namespace KingQuestionProxy
         /// 就是原始参数答案
         /// </summary>
         /// <param name="question"></param>
+        /// <param name="trys">尝试次数</param>
         /// <returns></returns>
-        private static string[] SearchSourceAnswers(string question)
+        private static string[] SearchSourceAnswers(string question, int trys)
         {
-            for (var i = 0; i < 3; i++)
+            for (var i = 0; i < trys; i++)
             {
                 try
                 {
-                    using (var client = new WebClient())
-                    {
-                        var address = $"http://www.baidu.com/s?ie=utf-8&wd={question}";
-                        var datas = client.DownloadData(address);
-                        return FindAbstracts(datas);
-                    }
+                    return SearchSourceAnswers(question);
                 }
                 catch (Exception ex)
                 {
@@ -104,30 +95,17 @@ namespace KingQuestionProxy
         /// 找class="c-abstract"的标签的文本
         /// 就是原始参数答案
         /// </summary>
-        /// <param name="question"></param>
+        /// <param name="question">问题</param>
         /// <returns></returns>
-        private static async Task<string[]> SearchSourceAnswersAsync(string question)
+        private static string[] SearchSourceAnswers(string question)
         {
-            for (var i = 0; i < 3; i++)
+            using (var client = new WebClient())
             {
-                try
-                {
-                    var address = $"http://www.baidu.com/s?ie=utf-8&wd={question}";
-                    var datas = await httpClient.GetByteArrayAsync(address);
-                    return FindAbstracts(datas);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
+                var address = $"http://www.baidu.com/s?ie=utf-8&wd={question}";
+                var html = client.DownloadData(address);
+                CQ cQ = Encoding.UTF8.GetString(html);
+                return cQ.Find(".c-abstract").Select(item => item.Cq().Text()).ToArray();
             }
-            return new string[0];
-        }
-
-        private static string[] FindAbstracts(byte[] html)
-        {
-            CQ cQ = Encoding.UTF8.GetString(html);
-            return cQ.Find(".c-abstract").Select(item => item.Cq().Text()).ToArray();
         }
     }
 }

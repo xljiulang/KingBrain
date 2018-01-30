@@ -25,14 +25,9 @@ namespace KingQuestionProxy
         private static readonly TcpListener listener = new TcpListener();
 
         /// <summary>
-        /// http和ws商品
+        /// http和ws端口
         /// </summary>
         private static readonly int wsPort = int.Parse(ConfigurationManager.AppSettings["WsPort"]);
-
-        /// <summary>
-        /// 是否回复答案
-        /// </summary>
-        private static readonly bool withAnswer = ConfigurationManager.AppSettings["WithAnswer"] == "true";
 
         /// <summary>
         /// 王者数据处理器
@@ -67,12 +62,12 @@ namespace KingQuestionProxy
         /// <param name="session">会话</param>
         /// <returns></returns>
 
-        public static async void ProcessSessionAsync(Session session)
+        public static void ProcessSession(Session session)
         {
             var url = session.fullUrl;
             if (url.Contains("question/bat/findQuiz") == true)
             {
-                await SearchAnswerAsync(session);
+                SetResponseWithAnswer(session);
             }
             else if (url.Contains("question/bat/choose") == true)
             {
@@ -91,8 +86,7 @@ namespace KingQuestionProxy
         /// 并转发给对应的ws客户端
         /// </summary>
         /// <param name="session">会话</param>
-        /// <returns></returns>
-        private static async Task SearchAnswerAsync(Session session)
+        private static void SetResponseWithAnswer(Session session)
         {
             session.utilDecodeRequest();
             session.utilDecodeResponse();
@@ -107,7 +101,7 @@ namespace KingQuestionProxy
             }
 
             var beginTime = DateTime.Now;
-            var data = await SearchHistoryDataAsync(session, withAnswer);
+            var data = SearchHistoryData(session);
 
 
             const double offsetSecondes = 3.7d;
@@ -124,20 +118,17 @@ namespace KingQuestionProxy
             WsNotifyByClientIP(notifyData, session.clientIP);
 
 
-            if (withAnswer == true)
+            var qData = data.QuestionData;
+            if (data.SearchResult.Best != null)
             {
-                var qData = data.QuestionData;
-                if (data.SearchResult.Best != null)
-                {
-                    var index = data.SearchResult.Best.Index;
-                    qData.quiz = qData.quiz + $" [{(char)('A' + index)}]";
-                    qData.options[index] = qData.options[index] + "[√]";
-                }
-
-                var q = new KingQuestion { data = qData };
-                var json = JsonConvert.SerializeObject(q);
-                session.utilSetResponseBody(json);
+                var index = data.SearchResult.Best.Index;
+                qData.quiz = qData.quiz + $" [{(char)('A' + index)}]";
+                qData.options[index] = qData.options[index] + "[√]";
             }
+
+            var q = new KingQuestion { data = qData };
+            var json = JsonConvert.SerializeObject(q);
+            session.utilSetResponseBody(json);
         }
 
         /// <summary>
@@ -145,9 +136,8 @@ namespace KingQuestionProxy
         /// 并转发给对应的ws客户端
         /// </summary>
         /// <param name="session">会话</param>
-        /// <param name="sync">是否同步</param>
         /// <returns></returns>
-        private static async Task<HistoryData> SearchHistoryDataAsync(Session session, bool sync)
+        private static HistoryData SearchHistoryData(Session session)
         {
             session.utilDecodeRequest();
             session.utilDecodeResponse();
@@ -172,7 +162,7 @@ namespace KingQuestionProxy
                 {
                     QuestionData = kingQuestion.data,
                     KingRequest = KingRequest.Parse(requestBody),
-                    SearchResult = await BaiduSearcher.SearchAsync(kingQuestion, withAnswer)
+                    SearchResult = BaiduSearcher.Search(kingQuestion)
                 };
                 HistoryDataTable.TryAdd(history);
             }

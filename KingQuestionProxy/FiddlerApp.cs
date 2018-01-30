@@ -50,7 +50,7 @@ namespace KingQuestionProxy
             // 收到服务端的回复
             FiddlerApplication.BeforeResponse += (session) =>
             {
-                KingProcesser.ProcessSessionAsync(session);
+                KingProcesser.ProcessSession(session);
             };
 
             var e = CertMaker.rootCertExists();
