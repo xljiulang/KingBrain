@@ -92,7 +92,7 @@ namespace KingQuestionProxy
             // 配置代理服务器
             CONFIG.IgnoreServerCertErrors = true;
             FiddlerApplication.Prefs.SetBoolPref("fiddler.network.streaming.abortifclientaborts", true);
-            FiddlerApplication.Startup(proxyPort, false, true, true);
+            FiddlerApplication.Startup(proxyPort, FiddlerCoreStartupFlags.AllowRemoteClients | FiddlerCoreStartupFlags.DecryptSSL);
 
             sslProxyServer = FiddlerApplication.CreateProxyEndpoint(sslAddress.Port, true, sslAddress.Host);
             if (sslProxyServer == null)
