@@ -17,18 +17,21 @@ namespace KingQuestionProxy
     {
         private static readonly object syncRoot = new object();
 
-        private static readonly string dataFile = "data\\data.json";
-
         private static readonly Dictionary<int, HistoryData> dictionary = new Dictionary<int, HistoryData>();
+
+        /// <summary>
+        /// 获取数据文件路径
+        /// </summary>
+        public static readonly string DataFile = "data\\data.json";
 
         /// <summary>
         /// 从文件加载
         /// </summary>
         static HistoryDataTable()
         {
-            if (File.Exists(dataFile))
+            if (File.Exists(DataFile))
             {
-                var json = File.ReadAllText(dataFile, Encoding.UTF8);
+                var json = File.ReadAllText(DataFile, Encoding.UTF8);
                 var datas = JsonConvert.DeserializeObject<HistoryData[]>(json);
                 foreach (var item in datas)
                 {
@@ -97,7 +100,7 @@ namespace KingQuestionProxy
             lock (syncRoot)
             {
                 var json = JsonConvert.SerializeObject(dictionary.Values.ToArray());
-                File.WriteAllText(dataFile, json, Encoding.UTF8);
+                File.WriteAllText(DataFile, json, Encoding.UTF8);
             }
         }
 

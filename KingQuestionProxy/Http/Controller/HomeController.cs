@@ -83,7 +83,7 @@ namespace KingQuestionProxy
         [Route("/Data/Export")]
         public ActionResult ExportData()
         {
-            return File("data.json", "application/octet-stream");
+            return File(HistoryDataTable.DataFile, "application/octet-stream");
         }
 
         /// <summary>
