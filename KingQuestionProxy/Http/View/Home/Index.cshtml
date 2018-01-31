@@ -5,11 +5,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
     <title>首页</title>
-    <script src="/Http/Content/jquery-1.7.1.min.js"></script>
+    <script src="/Http/Libs/jquery-1.7.1.min.js"></script>
 
     <script type="text/javascript">
         function viewClient() {
-            location.href = '/client?ip=' + $('#ipAddress').val();
+            var clientIp = $('#ipAddress').val();
+            if (clientIp) {
+                location.href = '/client?ip=' + clientIp;
+            } else {
+                location.href = '/client';
+            }
         };
     </script>
 

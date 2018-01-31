@@ -54,7 +54,7 @@
     <None Update="Cert\rootCert.key">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Http\Content\bootstrap.min.css">
+    <None Update="Http\Libs\bootstrap.min.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Data\data.json">
@@ -63,7 +63,7 @@
     <None Update="Http\View\Home\Index.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Http\Content\jquery-1.7.1.min.js">
+    <None Update="Http\Libs\jquery-1.7.1.min.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
