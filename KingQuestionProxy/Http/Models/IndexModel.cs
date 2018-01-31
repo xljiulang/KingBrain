@@ -10,6 +10,8 @@ namespace KingQuestionProxy
     {
         public string ProxyIpEndpoint { get; set; }
 
+        public string WsIpEndpoint { get; set; }
+
         public string[] ClientsIp { get; set; }
     }
 }

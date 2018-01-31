@@ -25,18 +25,33 @@
     </style>
 </head>
 <body>
-
     <h3>使用教程</h3>
     <ol>
         <li>
-            <span></span><a href="/cert/client.cer">在手机点击下载安装证书</a>
+            <a href="/cert/client.cer">在手机点击下载安装证书</a>
         </li>
         <li>
             <span>给手机网络设置自动代理：http://@(Model.ProxyIpEndpoint)/proxy.pac</span>
         </li>
+        <li>
+            <span>进入头脑王者小程序开局，正确的选项卡会打√</span>
+        </li>
     </ol>
 
-    <h3>服务管理</h3>
+    <h3>客户端开发</h3>
+    <ol>
+        <li>
+            <span>使用websocket客户端连接到ws://@(Model.WsIpEndpoint)</span>
+        </li>
+        <li>
+            <span>准备答题时服务端会推送分析结果的Json给websocket客户端</span>
+        </li>
+        <li>
+            <span>游戏完成时服务端会推送结束事件Json给websocket客户端</span>
+        </li>
+    </ol>
+
+    <h3>服务器管理</h3>
     <ol>
         <li>
             <span>客户端列表</span>

@@ -47,6 +47,7 @@ namespace KingQuestionProxy
             var model = new IndexModel
             {
                 ProxyIpEndpoint = $"{this.Request.Url.Host}:{AppConfig.ProxyPort}",
+                WsIpEndpoint = $"{this.Request.Url.Host}:{AppConfig.WsPort}",
                 ClientsIp = clientsIp.Distinct().ToArray()
             };
 
