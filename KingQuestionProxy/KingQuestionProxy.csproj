@@ -48,10 +48,10 @@
     <None Update="Cert\client.cer">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Cert\proxy.cer">
+    <None Update="Cert\rootCert.cer">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Cert\proxy.key">
+    <None Update="Cert\rootCert.key">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Http\Content\bootstrap.min.css">

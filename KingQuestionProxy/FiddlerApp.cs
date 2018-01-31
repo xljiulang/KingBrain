@@ -67,8 +67,8 @@ namespace KingQuestionProxy
 
 
             // 配置代理服务器
-            CONFIG.IgnoreServerCertErrors = true;
-            FiddlerApp.SetRootCertificate();
+            Cert.SetRootCertificate();
+            CONFIG.IgnoreServerCertErrors = true;     
 
             FiddlerApplication.Prefs.SetBoolPref("fiddler.network.streaming.abortifclientaborts", true);
             FiddlerApplication.Startup(AppConfig.ProxyPort, FiddlerCoreStartupFlags.AllowRemoteClients | FiddlerCoreStartupFlags.DecryptSSL);
@@ -76,34 +76,7 @@ namespace KingQuestionProxy
             return true;
         }
 
-        /// <summary>
-        /// 设置证书
-        /// </summary>
-        private static void SetRootCertificate()
-        {
-            if (Cert.Exists() == false)
-            {
-                var certString = File.ReadAllText(Cert.Proxy_Cert, Encoding.ASCII);
-                var keyString = File.ReadAllText(Cert.Proxy_Key, Encoding.ASCII);
 
-                FiddlerApplication.Prefs.SetStringPref("fiddler.certmaker.bc.cert", certString);
-                FiddlerApplication.Prefs.SetStringPref("fiddler.certmaker.bc.key", keyString);
-            }
-            else
-            {
-                CertMaker.createRootCert();
-                var cert = CertMaker.GetRootCertificate();
-
-                var clientCer = cert.Export(X509ContentType.Cert);
-                File.WriteAllBytes(Cert.Client_Cer, clientCer);
-
-                var certString = FiddlerApplication.Prefs.GetStringPref("fiddler.certmaker.bc.cert", null);
-                var keyString = FiddlerApplication.Prefs.GetStringPref("fiddler.certmaker.bc.key", null);
-
-                File.WriteAllText(Cert.Proxy_Cert, certString, Encoding.ASCII);
-                File.WriteAllText(Cert.Proxy_Key, keyString, Encoding.ASCII);
-            }
-        }
 
         /// <summary>
         /// 停止服务 
