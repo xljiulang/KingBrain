@@ -23,12 +23,6 @@ namespace KingQuestionProxy
         /// http和ws监听器
         /// </summary>
         private static readonly TcpListener listener = new TcpListener();
-
-        /// <summary>
-        /// http和ws端口
-        /// </summary>
-        private static readonly int wsPort = int.Parse(ConfigurationManager.AppSettings["WsPort"]);
-
         /// <summary>
         /// 王者数据处理器
         /// </summary>
@@ -38,7 +32,7 @@ namespace KingQuestionProxy
             http.MIMECollection.Add(".cer", "application/x-x509-ca-cert");
 
             listener.Use<WebsocketMiddleware>();
-            listener.Start(wsPort);
+            listener.Start(AppConfig.WsPort);
         }
 
         /// <summary>
@@ -54,16 +48,6 @@ namespace KingQuestionProxy
         public static void CloseListener()
         {
             listener.Dispose();
-        }
-
-        /// <summary>
-        /// 是否支持处理指定的uri
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <returns></returns>
-        public static bool IsSupport(Uri uri)
-        {
-            return uri.PathAndQuery.Contains("question/bat");
         }
 
         /// <summary>

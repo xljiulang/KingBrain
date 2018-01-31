@@ -19,18 +19,8 @@ namespace KingQuestionProxy
     /// <summary>
     /// 表示Fiddler应用
     /// </summary>
-    public class FiddlerApp : Topshelf.ServiceControl
+    public class FiddlerApp : ServiceControl
     {
-        /// <summary>
-        /// 代理端口
-        /// </summary>
-        private static readonly int proxyPort = int.Parse(ConfigurationManager.AppSettings["ProxyPort"]);
-
-        /// <summary>
-        /// ws服务端口
-        /// </summary>
-        private static readonly int wsPort = int.Parse(ConfigurationManager.AppSettings["WsPort"]);
-
         /// <summary>
         /// 所有会话的集合
         /// </summary>
@@ -54,18 +44,17 @@ namespace KingQuestionProxy
 
                 // 首页重定向
                 var uri = new Uri(session.fullUrl);
-                if (uri.Port == proxyPort || uri.Port == wsPort)
+                if (uri.Port == AppConfig.ProxyPort || uri.Port == AppConfig.WsPort)
                 {
-                    session.host = $"{uri.Host}:{wsPort}";
+                    session.host = $"{uri.Host}:{ AppConfig.WsPort}";
                     AllSessions.Add(session);
                 }
-                else if (KingProcesser.IsSupport(uri))
+                else if (AppConfig.AllowProxy(uri.Host))
                 {
                     AllSessions.Add(session);
                 }
                 else
                 {
-                    // 关闭非正常的代理地址访问
                     session.Abort();
                 }
             };
@@ -82,7 +71,7 @@ namespace KingQuestionProxy
             FiddlerApp.SetRootCertificate();
 
             FiddlerApplication.Prefs.SetBoolPref("fiddler.network.streaming.abortifclientaborts", true);
-            FiddlerApplication.Startup(proxyPort, FiddlerCoreStartupFlags.AllowRemoteClients | FiddlerCoreStartupFlags.DecryptSSL);
+            FiddlerApplication.Startup(AppConfig.ProxyPort, FiddlerCoreStartupFlags.AllowRemoteClients | FiddlerCoreStartupFlags.DecryptSSL);
 
             return true;
         }

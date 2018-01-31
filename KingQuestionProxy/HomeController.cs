@@ -18,16 +18,6 @@ namespace KingQuestionProxy
     public class HomeController : HttpController
     {
         /// <summary>
-        /// 代理端口
-        /// </summary>
-        private static readonly string proxyPort = ConfigurationManager.AppSettings["ProxyPort"];
-
-        /// <summary>
-        /// ws服务端口
-        /// </summary>
-        private static readonly string WsPort = ConfigurationManager.AppSettings["WsPort"];
-
-        /// <summary>
         /// 首页
         /// </summary>
         /// <returns></returns>
@@ -41,7 +31,7 @@ namespace KingQuestionProxy
 
             var model = new IndexModel
             {
-                ProxyIpEndpoint = $"{this.Request.Url.Host}:{proxyPort}",
+                ProxyIpEndpoint = $"{this.Request.Url.Host}:{AppConfig.ProxyPort}",
                 ClientsIp = clientsIp.Distinct().ToArray()
             };
 
@@ -61,7 +51,7 @@ namespace KingQuestionProxy
             var model = new ClientModel
             {
                 IpAddress = ip,
-                WsServer = $"ws://{this.Request.Url.Host}:{WsPort}"
+                WsServer = $"ws://{this.Request.Url.Host}:{AppConfig.WsPort}"
             };
 
             var cshtml = System.IO.File.ReadAllText("View_Client.cshtml", Encoding.UTF8);
@@ -107,6 +97,27 @@ namespace KingQuestionProxy
             this.Response.Status = 301;
             this.Response.Headers.Add("location", "/");
             return new EmptyResult();
+        }
+
+        /// <summary>
+        /// 获取pac
+        /// </summary>
+        /// <returns></returns>
+        [Route("/Proxy.PAC")]
+        public ActionResult Proxy_PAC()
+        {
+            var buidler = new StringBuilder();
+            buidler.AppendLine("function FindProxyForURL(url, host){");
+            buidler.AppendLine($"    var proxy = 'PROXY {this.Request.Url.Host}:{AppConfig.ProxyPort}';");
+            foreach (var host in AppConfig.ProxyHosts)
+            {
+                buidler.AppendLine($"    if (dnsDomainIs(host, '{host}')) return proxy;");
+            }
+            buidler.AppendLine("    return 'DIRECT';");
+            buidler.AppendLine("}");
+
+            var pacString = buidler.ToString();
+            return Content(pacString);
         }
     }
 }
