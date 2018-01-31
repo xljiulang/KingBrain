@@ -81,10 +81,10 @@ namespace KingQuestionProxy
         /// </summary>
         private static void SetRootCertificate()
         {
-            if (File.Exists("proxy.cer") && File.Exists("proxy.key"))
+            if (Cert.Exists() == false)
             {
-                var certString = File.ReadAllText("proxy.cer", Encoding.ASCII);
-                var keyString = File.ReadAllText("proxy.key", Encoding.ASCII);
+                var certString = File.ReadAllText(Cert.Proxy_Cert, Encoding.ASCII);
+                var keyString = File.ReadAllText(Cert.Proxy_Key, Encoding.ASCII);
 
                 FiddlerApplication.Prefs.SetStringPref("fiddler.certmaker.bc.cert", certString);
                 FiddlerApplication.Prefs.SetStringPref("fiddler.certmaker.bc.key", keyString);
@@ -95,13 +95,13 @@ namespace KingQuestionProxy
                 var cert = CertMaker.GetRootCertificate();
 
                 var clientCer = cert.Export(X509ContentType.Cert);
-                File.WriteAllBytes("client.cer", clientCer);
+                File.WriteAllBytes(Cert.Client_Cer, clientCer);
 
                 var certString = FiddlerApplication.Prefs.GetStringPref("fiddler.certmaker.bc.cert", null);
                 var keyString = FiddlerApplication.Prefs.GetStringPref("fiddler.certmaker.bc.key", null);
 
-                File.WriteAllText("proxy.cer", certString, Encoding.ASCII);
-                File.WriteAllText("proxy.key", keyString, Encoding.ASCII);
+                File.WriteAllText(Cert.Proxy_Cert, certString, Encoding.ASCII);
+                File.WriteAllText(Cert.Proxy_Key, keyString, Encoding.ASCII);
             }
         }
 

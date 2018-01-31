@@ -18,6 +18,20 @@ namespace KingQuestionProxy
     public class HomeController : HttpController
     {
         /// <summary>
+        /// 返回视图
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        private ActionResult View<T>(string name, T model)
+        {
+            var controller = this.CurrentContext.Action.ControllerName;
+            var cshtml = System.IO.File.ReadAllText($"Http\\View\\{controller}\\{name}.cshtml", Encoding.UTF8);
+            var html = Razor.Parse(cshtml, model);
+            return Content(html);
+        }
+
+        /// <summary>
         /// 首页
         /// </summary>
         /// <returns></returns>
@@ -35,9 +49,7 @@ namespace KingQuestionProxy
                 ClientsIp = clientsIp.Distinct().ToArray()
             };
 
-            var cshtml = System.IO.File.ReadAllText("View_Index.cshtml", Encoding.UTF8);
-            var html = Razor.Parse(cshtml, model);
-            return Content(html);
+            return this.View("Index", model);
         }
 
 
@@ -54,17 +66,13 @@ namespace KingQuestionProxy
                 WsServer = $"ws://{this.Request.Url.Host}:{AppConfig.WsPort}"
             };
 
-            var cshtml = System.IO.File.ReadAllText("View_Client.cshtml", Encoding.UTF8);
-            var html = Razor.Parse(cshtml, model);
-            return Content(html);
+            return this.View("Client", model);
         }
 
         [Route("/GetHtml")]
         public ActionResult GetHtml([Body] SearchResult model)
         {
-            var cshtml = System.IO.File.ReadAllText("View_GetHtml.cshtml", Encoding.UTF8);
-            var html = Razor.Parse(cshtml, model);
-            return Content(html);
+            return this.View("GetHtml", model);
         }
 
         /// <summary>
@@ -118,6 +126,11 @@ namespace KingQuestionProxy
 
             var pacString = buidler.ToString();
             return Content(pacString);
+        }
+
+        protected override void OnException(NetworkSocket.Http.ExceptionContext filterContext)
+        {
+            base.OnException(filterContext);
         }
     }
 }

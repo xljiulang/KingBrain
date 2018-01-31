@@ -17,7 +17,7 @@ namespace KingQuestionProxy
     {
         private static readonly object syncRoot = new object();
 
-        private static readonly string dataFile = "data.json";
+        private static readonly string dataFile = "data\\data.json";
 
         private static readonly Dictionary<int, HistoryData> dictionary = new Dictionary<int, HistoryData>();
 
