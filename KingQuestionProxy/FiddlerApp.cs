@@ -25,10 +25,11 @@ namespace KingQuestionProxy
         /// 代理端口
         /// </summary>
         private static readonly int proxyPort = int.Parse(ConfigurationManager.AppSettings["ProxyPort"]);
+
         /// <summary>
         /// ws服务端口
         /// </summary>
-        private static readonly string wsPort = ConfigurationManager.AppSettings["WsPort"];
+        private static readonly int wsPort = int.Parse(ConfigurationManager.AppSettings["WsPort"]);
 
         /// <summary>
         /// 所有会话的集合
@@ -53,11 +54,20 @@ namespace KingQuestionProxy
 
                 // 首页重定向
                 var uri = new Uri(session.fullUrl);
-                if (uri.Port == proxyPort)
+                if (uri.Port == proxyPort || uri.Port == wsPort)
                 {
                     session.host = $"{uri.Host}:{wsPort}";
+                    AllSessions.Add(session);
                 }
-                AllSessions.Add(session);
+                else if (KingProcesser.IsSupport(uri))
+                {
+                    AllSessions.Add(session);
+                }
+                else
+                {
+                    // 关闭非正常的代理地址访问
+                    session.Abort();
+                }
             };
 
             // 收到服务端的回复
@@ -92,7 +102,9 @@ namespace KingQuestionProxy
             }
             else
             {
+                CertMaker.createRootCert();
                 var cert = CertMaker.GetRootCertificate();
+
                 var clientCer = cert.Export(X509ContentType.Cert);
                 File.WriteAllBytes("client.cer", clientCer);
 

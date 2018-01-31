@@ -57,6 +57,16 @@ namespace KingQuestionProxy
         }
 
         /// <summary>
+        /// 是否支持处理指定的uri
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        public static bool IsSupport(Uri uri)
+        {
+            return uri.PathAndQuery.Contains("question/bat");
+        }
+
+        /// <summary>
         /// 处理会话
         /// </summary>
         /// <param name="session">会话</param>
@@ -123,7 +133,7 @@ namespace KingQuestionProxy
             {
                 var index = data.SearchResult.Best.Index;
                 qData.quiz = qData.quiz + $" [{(char)('A' + index)}]";
-                qData.options[index] = qData.options[index] + "[√]";
+                qData.options[index] = qData.options[index] + " [√]";
             }
 
             var q = new KingQuestion { data = qData };
