@@ -10,6 +10,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Data.Entity;
 
 namespace KingQuestionProxy
 {
@@ -18,20 +19,6 @@ namespace KingQuestionProxy
     /// </summary>
     public class HomeController : HttpController
     {
-        /// <summary>
-        /// 返回视图
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        private ActionResult View<T>(string name, T model)
-        {
-            var controller = this.CurrentContext.Action.ControllerName;
-            var cshtml = System.IO.File.ReadAllText($"Http\\View\\{controller}\\{name}.cshtml", Encoding.UTF8);
-            var html = Razor.Parse(cshtml, model);
-            return Content(html);
-        }
-
         /// <summary>
         /// 首页
         /// </summary>
@@ -71,6 +58,11 @@ namespace KingQuestionProxy
             return this.View("Client", model);
         }
 
+        /// <summary>
+        /// 生成WsGameAnswer的html
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [Route("/GetHtml")]
         public ActionResult GetHtml([Body] WsGameAnswer model)
         {
@@ -94,40 +86,43 @@ namespace KingQuestionProxy
         /// </summary>
         /// <returns></returns>
         [Route("/Data/Import")]
-        public ActionResult ImportData()
+        public async Task<ActionResult> ImportDataAsync()
         {
-            if (this.Request.Files.Length > 0)
+            if (this.Request.Files.Length == 0)
             {
-                var file = this.Request.Files.First();
-                if (file.FileName.EndsWith("data.db", StringComparison.OrdinalIgnoreCase))
+                return this.RedirectToIndex();
+            }
+            var file = this.Request.Files.First();
+            if (file.FileName.EndsWith(".db", StringComparison.OrdinalIgnoreCase) == false)
+            {
+                return this.RedirectToIndex();
+            }
+
+            var dbFile = "data\\import.db";
+            System.IO.File.WriteAllBytes(dbFile, file.Stream);
+
+            using (var sourceDb = new SqlliteContext(dbFile))
+            {
+                using (var targetDb = new SqlliteContext())
                 {
-                    var dbFile = "import.db";
-                    System.IO.File.WriteAllBytes(dbFile, file.Stream);
-                    using (var sourceDb = new SqlliteContext(dbFile))
+                    var datas = await sourceDb.QuizAnswer.ToArrayAsync();
+                    foreach (var data in datas)
                     {
-                        using (var targetDb = new SqlliteContext())
+                        if (await targetDb.QuizAnswer.AnyAsync(item => item.Quiz == data.Quiz) == false)
                         {
-                            var datas = sourceDb.QuizAnswer.ToArray();
-                            foreach (var data in datas)
-                            {
-                                if (targetDb.QuizAnswer.Any(item => item.Quiz == data.Quiz) == false)
-                                {
-                                    targetDb.QuizAnswer.Add(data);
-                                }
-                            }
-                            targetDb.SaveChanges();
+                            targetDb.QuizAnswer.Add(data);
                         }
                     }
+                    await targetDb.SaveChangesAsync();
                 }
             }
 
-            this.Response.Status = 301;
-            this.Response.Headers.Add("location", "/");
-            return new EmptyResult();
+            System.IO.File.Delete(dbFile);
+            return this.RedirectToIndex();
         }
 
         /// <summary>
-        /// 获取pac
+        /// 动态生成pac
         /// </summary>
         /// <returns></returns>
         [Route("/Proxy.PAC")]
@@ -147,8 +142,34 @@ namespace KingQuestionProxy
             return Content(pacString);
         }
 
+        /// <summary>
+        /// 返回视图
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        private ActionResult View<T>(string name, T model)
+        {
+            var controller = this.CurrentContext.Action.ControllerName;
+            var cshtml = System.IO.File.ReadAllText($"Http\\View\\{controller}\\{name}.cshtml", Encoding.UTF8);
+            var html = Razor.Parse(cshtml, model);
+            return Content(html);
+        }
+
+        /// <summary>
+        /// 中转到首页
+        /// </summary>
+        /// <returns></returns>
+        private ActionResult RedirectToIndex()
+        {
+            this.Response.Status = 301;
+            this.Response.Headers.Add("location", "/");
+            return new EmptyResult();
+        }
+
         protected override void OnException(NetworkSocket.Http.ExceptionContext filterContext)
         {
+            Console.WriteLine(filterContext.Exception);
             base.OnException(filterContext);
         }
     }
