@@ -38,5 +38,17 @@ namespace KingQuestionProxy
         [Required]
         [StringLength(20)]
         public string Answer { get; set; }
+
+        /// <summary>
+        /// 转换为字符串
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return new StringBuilder()
+                .AppendLine(this.Quiz)
+                .AppendLine(this.Answer)
+                .ToString();
+        }
     }
 }

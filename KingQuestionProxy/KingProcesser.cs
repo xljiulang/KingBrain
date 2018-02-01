@@ -156,6 +156,7 @@ namespace KingQuestionProxy
 
                 if (quizAnswer != null)
                 {
+                    Console.WriteLine($"从db中找到记录：{Environment.NewLine}{quizAnswer}");
                     var answer = quizAnswer.Answer?.Trim();
                     return Array.FindIndex(kingQuestion.data.options, item => item?.Trim() == answer);
                 }
