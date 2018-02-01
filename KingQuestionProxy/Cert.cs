@@ -43,7 +43,7 @@ namespace KingQuestionProxy
         /// </summary>
         public static void SetRootCertificate()
         {
-            if (Cert.Exists() == false)
+            if (Cert.Exists() == true)
             {
                 var certString = File.ReadAllText(Cert.RootCert_Cer, Encoding.ASCII);
                 var keyString = File.ReadAllText(Cert.RootCert_Key, Encoding.ASCII);
