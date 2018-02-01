@@ -139,6 +139,15 @@ namespace KingQuestionProxy
                 return -1;
             }
 
+            // 保存请求上下文
+            var context = new KingContext
+            {
+                KingRequest = KingRequest.Parse(requestBody),
+                QuestionData = kingQuestion.data
+            };
+            KingContextTable.Add(context);
+
+
             using (var sqlLite = new SqlliteContext())
             {
                 var quiz = kingQuestion.data.quiz;
@@ -149,18 +158,8 @@ namespace KingQuestionProxy
                     return Array.FindIndex(kingQuestion.data.options, item => item == quizAnswer.Answer);
                 }
 
-                // 保存请求上下文
-                var context = new KingContext
-                {
-                    KingRequest = KingRequest.Parse(requestBody),
-                    QuestionData = kingQuestion.data
-                };
-                KingContextTable.Add(context);
-
                 // 搜索
-                var searchResult = BaiduSearcher.Search(kingQuestion);
-                var best = searchResult.Best;
-
+                var best = BaiduSearcher.Search(kingQuestion).Best;
                 if (best != null)
                 {
                     quizAnswer = new QuizAnswer
@@ -224,20 +223,18 @@ namespace KingQuestionProxy
             }
 
             var context = KingContextTable.GetByRequest(kingRequest);
-            if (context == null)
+            if (context != null)
             {
-                return;
-            }
-
-            using (var sqlLite = new SqlliteContext())
-            {
-                var quiz = context.QuestionData.quiz;
-                var quizAnswer = sqlLite.QuizAnswer.Find(quiz);
-
-                if (quizAnswer != null)
+                using (var sqlLite = new SqlliteContext())
                 {
-                    quizAnswer.Answer = context.GetAnswer(kingAnswer);
-                    sqlLite.SaveChanges();
+                    var quiz = context.QuestionData.quiz;
+                    var quizAnswer = sqlLite.QuizAnswer.Find(quiz);
+
+                    if (quizAnswer != null)
+                    {
+                        quizAnswer.Answer = context.GetAnswer(kingAnswer);
+                        sqlLite.SaveChanges();
+                    }
                 }
             }
         }
