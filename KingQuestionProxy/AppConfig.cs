@@ -28,12 +28,18 @@ namespace KingQuestionProxy
         public static readonly string[] ProxyHosts;
 
         /// <summary>
+        /// 是否仅代理pac列表的域名
+        /// </summary>
+        private static readonly bool proxyPacOnly;
+
+        /// <summary>
         /// 构造器
         /// </summary>
         static AppConfig()
         {
-            var section = ConfigurationManager.GetSection("PacConfig") as PacConfigSection;
-            ProxyHosts = section.proxy.Cast<PacItem>().Select(item => item.host).ToArray();
+            var section = ConfigurationManager.GetSection("PacConfig") as ProxyConfigSection;
+            proxyPacOnly = section.ProxyPacOnly;
+            ProxyHosts = section.PAC.Cast<PacItem>().Select(item => item.host).ToArray();
         }
 
         /// <summary>
@@ -43,6 +49,10 @@ namespace KingQuestionProxy
         /// <returns></returns>
         public static bool AllowProxy(string host)
         {
+            if (proxyPacOnly == false)
+            {
+                return true;
+            }
             return ProxyHosts.Any(item => item.Equals(host, StringComparison.OrdinalIgnoreCase));
         }
 

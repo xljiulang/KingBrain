@@ -8,14 +8,32 @@ using System.Xml;
 
 namespace KingQuestionProxy
 {
-    public class PacConfigSection : ConfigurationSection
+    /// <summary>
+    /// 代理设置
+    /// </summary>
+    public class ProxyConfigSection : ConfigurationSection
     {
-        [ConfigurationProperty("proxy")]
-        public PacCollection proxy
+        /// <summary>
+        /// 自动代理设置
+        /// </summary>
+        [ConfigurationProperty("pac")]
+        public PacCollection PAC
         {
             get
             {
-                return (PacCollection)this["proxy"];
+                return (PacCollection)this["pac"];
+            }
+        }
+
+        /// <summary>
+        /// 是否仅代理pac列表的域名
+        /// </summary>
+        [ConfigurationProperty("proxyPacOnly")]
+        public bool ProxyPacOnly
+        {
+            get
+            {
+                return (bool)this["proxyPacOnly"];
             }
         }
     }
