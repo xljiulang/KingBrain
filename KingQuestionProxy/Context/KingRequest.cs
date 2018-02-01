@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Fiddler;
+using System;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace KingQuestionProxy
 {
@@ -48,11 +47,23 @@ namespace KingQuestionProxy
         }
 
         /// <summary>
+        /// 从会话获得
+        /// </summary>
+        /// <param name="session"></param>
+        /// <returns></returns>
+        public static KingRequest FromSession(Session session)
+        {
+            session.utilDecodeRequest();
+            var requestBody = Encoding.UTF8.GetString(session.RequestBody);
+            return Parse(requestBody);
+        }
+
+        /// <summary>
         /// roomID=4224224371&quizNum=1&uid=194682676
         /// </summary>
         /// <param name="requestBody">请求体内容</param>
         /// <returns></returns>
-        public static KingRequest Parse(string requestBody)
+        private static KingRequest Parse(string requestBody)
         {
             var request = new KingRequest();
 

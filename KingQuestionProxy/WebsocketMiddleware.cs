@@ -23,7 +23,6 @@ namespace KingQuestionProxy
         {
             var ipAddress = (session.RemoteEndPoint as IPEndPoint).Address.ToString();
             session.Tag.Set("ip", ipAddress);
-
             base.OnSetProtocolWrapper(session, wrapper);
         }
 

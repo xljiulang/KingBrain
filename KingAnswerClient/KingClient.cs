@@ -60,7 +60,7 @@ namespace KingAnswerClient
                 else
                 {
                     var index = new Random().Next(0, 3);
-                    var delay = TimeSpan.FromMilliseconds(gameAnswer.DelayMilliseconds + 4000);
+                    var delay = TimeSpan.FromMilliseconds(gameAnswer.DelayMilliseconds).Add(TimeSpan.FromSeconds(4d));
                     await this.AutotapOptionsAsync(index, delay);
                 }
                 Console.WriteLine();

@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Concurrent;
-using Newtonsoft.Json;
-using System.IO;
-using NetworkSocket.Http;
+using System.Threading;
 
 namespace KingQuestionProxy
 {
@@ -15,6 +9,9 @@ namespace KingQuestionProxy
     /// </summary>
     static class KingContextTable
     {
+        /// <summary>
+        /// 同步锁
+        /// </summary>
         private static readonly object syncRoot = new object();
 
         /// <summary>
@@ -31,6 +28,20 @@ namespace KingQuestionProxy
             lock (syncRoot)
             {
                 list.Add(context);
+                var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1d));
+                cts.Token.Register(() => Remove(context));
+            }
+        }
+
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="context"></param>
+        private static void Remove(KingContext context)
+        {
+            lock (syncRoot)
+            {
+                list.Remove(context);
             }
         }
 
@@ -39,11 +50,19 @@ namespace KingQuestionProxy
         /// </summary>
         /// <param name="kingRequest">请求体内容获</param>
         /// <returns></returns>
-        public static KingContext GetByRequest(KingRequest kingRequest)
+        public static KingContext TakeByRequest(KingRequest kingRequest)
         {
             lock (syncRoot)
             {
-                return list.FirstOrDefault(item => item.KingRequest.Equals(kingRequest));
+                var index = list.FindIndex(item => item.KingRequest.Equals(kingRequest));
+                if (index < 0)
+                {
+                    return null;
+                }
+
+                var context = list[index];
+                list.RemoveAt(index);
+                return context;
             }
         }
     }

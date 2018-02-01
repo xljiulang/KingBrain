@@ -126,13 +126,7 @@ namespace KingQuestionProxy
         /// <returns></returns>
         private static int GetOptionIndex(Session session, out KingQuestion kingQuestion)
         {
-            session.utilDecodeRequest();
-            session.utilDecodeResponse();
-
-            var requestBody = Encoding.UTF8.GetString(session.RequestBody);
-            var responseBody = Encoding.UTF8.GetString(session.ResponseBody);
-
-            kingQuestion = KingQuestion.Parse(responseBody);
+            kingQuestion = KingQuestion.FromSession(session);
             if (kingQuestion == null || kingQuestion.IsValidate() == false)
             {
                 return -1;
@@ -141,7 +135,7 @@ namespace KingQuestionProxy
             KingContextTable.Add(new KingContext
             {
                 KingQuestion = kingQuestion,
-                KingRequest = KingRequest.Parse(requestBody)
+                KingRequest = KingRequest.FromSession(session)
             });
 
             // 找答案
@@ -168,18 +162,22 @@ namespace KingQuestionProxy
 
                 // 搜索
                 var best = BaiduSearcher.Search(kingQuestion).Best;
-                if (best != null)
+                if (best == null)
                 {
-                    quizAnswer = new QuizAnswer
+                    return -1;
+                }
+
+                if (sqlLite.QuizAnswer.Any(item => item.Quiz == kingQuestion.data.quiz) == false)
+                {
+                    sqlLite.QuizAnswer.Add(new QuizAnswer
                     {
                         Answer = best.Options,
                         Quiz = kingQuestion.data.quiz,
                         OptionsJson = JsonConvert.SerializeObject(kingQuestion.data.options)
-                    };
-                    sqlLite.QuizAnswer.Add(quizAnswer);
+                    });
                     sqlLite.SaveChanges();
                 }
-                return best == null ? -1 : best.Index;
+                return best.Index;
             }
         }
 
@@ -212,37 +210,34 @@ namespace KingQuestionProxy
         }
 
         /// <summary>
-        /// 更新最佳选项并保存
+        /// 更新最佳选项到db
         /// </summary>
         /// <param name="session"></param>
         private static void UpdateCorrectOptions(Session session)
         {
-            session.utilDecodeRequest();
-            session.utilDecodeResponse();
+            var kingRequest = KingRequest.FromSession(session);
+            var kingAnswer = KingAnswer.FromSession(session);
 
-            var requestBody = Encoding.UTF8.GetString(session.RequestBody);
-            var responseBody = Encoding.UTF8.GetString(session.ResponseBody);
-
-            var kingRequest = KingRequest.Parse(requestBody);
-            var kingAnswer = KingAnswer.Parse(responseBody);
             if (kingAnswer == null || kingAnswer.IsValidate() == false)
             {
                 return;
             }
 
-            var context = KingContextTable.GetByRequest(kingRequest);
-            if (context != null)
+            var context = KingContextTable.TakeByRequest(kingRequest);
+            if (context == null)
             {
-                using (var sqlLite = new SqlliteContext())
-                {
-                    var quiz = context.KingQuestion.data.quiz;
-                    var quizAnswer = sqlLite.QuizAnswer.Find(quiz);
+                return;
+            }
 
-                    if (quizAnswer != null)
-                    {
-                        quizAnswer.Answer = context.GetAnswer(kingAnswer);
-                        sqlLite.SaveChanges();
-                    }
+            using (var sqlLite = new SqlliteContext())
+            {
+                var quiz = context.KingQuestion.data.quiz;
+                var quizAnswer = sqlLite.QuizAnswer.Find(quiz);
+
+                if (quizAnswer != null)
+                {
+                    quizAnswer.Answer = context.GetAnswer(kingAnswer);
+                    sqlLite.SaveChanges();
                 }
             }
         }
