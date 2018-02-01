@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace KingQuestionProxy
 {
     /// <summary>
-    /// 表示数据上下文数据
+    /// 表示http数据上下文
     /// </summary>
     public class KingContext
     {
@@ -17,9 +17,9 @@ namespace KingQuestionProxy
         public KingRequest KingRequest { get; set; }
 
         /// <summary>
-        /// 问题信息
+        /// 响应的问题信息
         /// </summary>
-        public KingQuestionData QuestionData { get; set; }
+        public KingQuestion KingQuestion { get; set; }
 
         /// <summary>
         /// 获取答案内容
@@ -29,7 +29,7 @@ namespace KingQuestionProxy
         public string GetAnswer(KingAnswer kingAnswer)
         {
             var index = kingAnswer.data.answer - 1;
-            return this.QuestionData.options[index];
+            return this.KingQuestion.data.options[index];
         }
     }
 }

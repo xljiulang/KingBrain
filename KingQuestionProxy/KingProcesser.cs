@@ -65,7 +65,7 @@ namespace KingQuestionProxy
             }
             else if (url.Contains("question/bat/choose") == true)
             {
-                UpdateBestAndSave(session);
+                UpdateCorrectOptions(session);
             }
             else if (url.Contains("question/bat/fightResult") == true)
             {
@@ -83,7 +83,7 @@ namespace KingQuestionProxy
         {
             var beginTime = DateTime.Now;
             var optionIndex = GetOptionIndex(session, out KingQuestion kingQuestion);
-            if (kingQuestion == null)
+            if (kingQuestion == null || kingQuestion.IsValidate() == false)
             {
                 return;
             }
@@ -110,7 +110,7 @@ namespace KingQuestionProxy
             if (optionIndex > -1)
             {
                 var quizData = kingQuestion.data;
-                quizData.quiz = quizData.quiz + $" [{(char)('A' + optionIndex)}]";
+                quizData.quiz = quizData.quiz + $" 老九提示：[{(char)('A' + optionIndex)}]";
                 quizData.options[optionIndex] = quizData.options[optionIndex] + " [√]";
 
                 var json = JsonConvert.SerializeObject(kingQuestion);
@@ -135,19 +135,26 @@ namespace KingQuestionProxy
             kingQuestion = KingQuestion.Parse(responseBody);
             if (kingQuestion == null || kingQuestion.IsValidate() == false)
             {
-                kingQuestion = null;
                 return -1;
             }
 
-            // 保存请求上下文
-            var context = new KingContext
+            KingContextTable.Add(new KingContext
             {
-                KingRequest = KingRequest.Parse(requestBody),
-                QuestionData = kingQuestion.data
-            };
-            KingContextTable.Add(context);
+                KingQuestion = kingQuestion,
+                KingRequest = KingRequest.Parse(requestBody)
+            });
 
+            // 找答案
+            return SearchOptionIndex(kingQuestion);
+        }
 
+        /// <summary>
+        /// 查找问题答案并保存到db
+        /// </summary>
+        /// <param name="kingQuestion">问题</param>
+        /// <returns></returns>
+        private static int SearchOptionIndex(KingQuestion kingQuestion)
+        {
             using (var sqlLite = new SqlliteContext())
             {
                 var quiz = kingQuestion.data.quiz;
@@ -206,7 +213,7 @@ namespace KingQuestionProxy
         /// 更新最佳选项并保存
         /// </summary>
         /// <param name="session"></param>
-        private static void UpdateBestAndSave(Session session)
+        private static void UpdateCorrectOptions(Session session)
         {
             session.utilDecodeRequest();
             session.utilDecodeResponse();
@@ -216,8 +223,7 @@ namespace KingQuestionProxy
 
             var kingRequest = KingRequest.Parse(requestBody);
             var kingAnswer = KingAnswer.Parse(responseBody);
-
-            if (kingAnswer == null || kingAnswer.data == null)
+            if (kingAnswer == null || kingAnswer.IsValidate() == false)
             {
                 return;
             }
@@ -227,7 +233,7 @@ namespace KingQuestionProxy
             {
                 using (var sqlLite = new SqlliteContext())
                 {
-                    var quiz = context.QuestionData.quiz;
+                    var quiz = context.KingQuestion.data.quiz;
                     var quizAnswer = sqlLite.QuizAnswer.Find(quiz);
 
                     if (quizAnswer != null)

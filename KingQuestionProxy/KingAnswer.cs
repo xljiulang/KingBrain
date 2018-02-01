@@ -31,6 +31,15 @@ namespace KingQuestionProxy
         {
             return JsonConvert.DeserializeObject<KingAnswer>(json);
         }
+
+        /// <summary>
+        /// 验证是否为Question
+        /// </summary>
+        /// <returns></returns>
+        public bool IsValidate()
+        {
+            return this.data != null && this.errcode == 0;
+        }
     }
 
     /// <summary>

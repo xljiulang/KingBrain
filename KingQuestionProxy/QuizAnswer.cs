@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace KingQuestionProxy
 {
     /// <summary>
-    /// 表示要存储的问题和答案
+    /// 表示要存储到db的问题和答案
     /// </summary>
     [Table("quizAnswer")]
     public class QuizAnswer

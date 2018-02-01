@@ -12,12 +12,13 @@ namespace KingQuestionProxy
     public class WsGameAnswer
     {
         /// <summary>
-        /// 索引
+        /// 最佳选项的索引
+        /// -1表示无答案
         /// </summary>
         public int Index { get; set; }
 
         /// <summary>
-        /// 提问
+        /// 提问内容
         /// </summary>
         public string Quiz { get; set; }
 

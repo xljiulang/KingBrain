@@ -45,7 +45,7 @@ namespace KingQuestionProxy
         /// <returns></returns>
         public bool IsValidate()
         {
-            return this.data != null && this.data.quiz != null && this.data.options != null;
+            return this.data != null && this.errcode == 0;
         }
 
         /// <summary>
