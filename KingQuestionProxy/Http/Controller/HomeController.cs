@@ -141,6 +141,7 @@ namespace KingQuestionProxy
             buidler.AppendLine("}");
 
             var pacString = buidler.ToString();
+            this.Response.ContentType = "application/x-ns-proxy-autoconfig";
             return Content(pacString);
         }
 
