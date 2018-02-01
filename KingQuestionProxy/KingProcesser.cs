@@ -172,7 +172,8 @@ namespace KingQuestionProxy
                     quizAnswer = new QuizAnswer
                     {
                         Answer = best.Options,
-                        Quiz = kingQuestion.data.quiz
+                        Quiz = kingQuestion.data.quiz,
+                        OptionsJson = JsonConvert.SerializeObject(kingQuestion.data.options)
                     };
                     sqlLite.QuizAnswer.Add(quizAnswer);
                     sqlLite.SaveChanges();

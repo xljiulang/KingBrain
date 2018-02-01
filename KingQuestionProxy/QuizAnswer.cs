@@ -22,6 +22,12 @@ namespace KingQuestionProxy
         public string Quiz { get; set; }
 
         /// <summary>
+        /// 选项卡json
+        /// </summary>
+        [Column("optionsJson")]
+        public string OptionsJson { get; set; }
+
+        /// <summary>
         /// 答案
         /// </summary>
         [Column("answer")]

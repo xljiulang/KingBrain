@@ -9,7 +9,7 @@
 
     @if (Model.Index >= 0)
     {
-        <h5>最佳答案：@(Model.Options[Model.Index])</h5>
+        <h5>最佳答案：@(Model.Index + 1) @(Model.Options[Model.Index])</h5>
     }
     else
     {
