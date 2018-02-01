@@ -53,6 +53,8 @@ namespace KingQuestionProxy
             {
                 result.Best = null;
             }
+
+            Console.WriteLine(result);
             return result;
         }
 

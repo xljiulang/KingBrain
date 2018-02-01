@@ -196,7 +196,7 @@ namespace KingQuestionProxy
                 try
                 {
                     var ip = ws.Tag.Get("ip").ToString();
-                    Debugger.Log(0, null, $"转发数据到{ip}");
+                    Console.WriteLine($"转发数据到{ip}");
                     if (clientIp == ip || clientIp.Contains(ip))
                     {
                         ws.SendText(jsonResult);

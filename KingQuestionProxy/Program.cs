@@ -1,4 +1,5 @@
 ﻿using Topshelf;
+using System;
 
 namespace KingQuestionProxy
 {
@@ -6,6 +7,9 @@ namespace KingQuestionProxy
     {
         public static void Main(string[] args)
         {
+            var logger = new Logger(Console.Out, new DebugWriter());
+            Console.SetOut(logger);
+
             HostFactory.Run(x =>
             {
                 x.Service<FiddlerApp>();
