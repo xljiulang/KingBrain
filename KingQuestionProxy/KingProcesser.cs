@@ -88,9 +88,9 @@ namespace KingQuestionProxy
                 return;
             }
 
+            // 推送答案给ws客户端
             const double offsetSecondes = 3.7d;
             var delay = (int)beginTime.AddSeconds(offsetSecondes).Subtract(DateTime.Now).TotalMilliseconds;
-
             var gameAnswer = new WsGameAnswer
             {
                 Index = optionIndex,
@@ -106,6 +106,7 @@ namespace KingQuestionProxy
             WsNotifyByClientIP(notifyData, session.clientIP);
 
 
+            // 改写响应结果
             if (optionIndex > -1)
             {
                 var quizData = kingQuestion.data;
@@ -148,17 +149,19 @@ namespace KingQuestionProxy
                     return Array.FindIndex(kingQuestion.data.options, item => item == quizAnswer.Answer);
                 }
 
-                var kingRequest = KingRequest.Parse(requestBody);
-                var searchResult = BaiduSearcher.Search(kingQuestion);
+                // 保存请求上下文
                 var context = new KingContext
                 {
-                    KingRequest = kingRequest,
+                    KingRequest = KingRequest.Parse(requestBody),
                     QuestionData = kingQuestion.data
                 };
                 KingContextTable.Add(context);
 
+                // 搜索
+                var searchResult = BaiduSearcher.Search(kingQuestion);
                 var best = searchResult.Best;
-                if (searchResult.Best != null)
+
+                if (best != null)
                 {
                     quizAnswer = new QuizAnswer
                     {
@@ -230,10 +233,10 @@ namespace KingQuestionProxy
             {
                 var quiz = context.QuestionData.quiz;
                 var quizAnswer = sqlLite.QuizAnswer.Find(quiz);
-                var answer = context.QuestionData.options[kingAnswer.data.answer - 1];
+
                 if (quizAnswer != null)
                 {
-                    quizAnswer.Answer = answer;
+                    quizAnswer.Answer = context.GetAnswer(kingAnswer);
                     sqlLite.SaveChanges();
                 }
             }

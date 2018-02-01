@@ -20,5 +20,16 @@ namespace KingQuestionProxy
         /// 问题信息
         /// </summary>
         public KingQuestionData QuestionData { get; set; }
+
+        /// <summary>
+        /// 获取答案内容
+        /// </summary>
+        /// <param name="kingAnswer"></param>
+        /// <returns></returns>
+        public string GetAnswer(KingAnswer kingAnswer)
+        {
+            var index = kingAnswer.data.answer - 1;
+            return this.QuestionData.options[index];
+        }
     }
 }
