@@ -12,13 +12,49 @@ namespace KingAnswerClient
     public class WsGameAnswer
     {
         /// <summary>
-        /// 搜索结果
+        /// 索引
         /// </summary>
-        public SearchResult SearchResult { get; set; }
+        public int Index { get; set; }
+
+        /// <summary>
+        /// 提问
+        /// </summary>
+        public string Quiz { get; set; }
+
+        /// <summary>
+        /// 选项
+        /// </summary>
+        public string[] Options { get; set; }
 
         /// <summary>
         /// 游戏可以点击的延时毫秒数
         /// </summary>
-        public int GameDelayMSeconds { get; set; }
+        public int DelayMilliseconds { get; set; }
+
+        /// <summary>
+        /// 转换为字符串
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine(this.Quiz);
+
+            var index = 0;
+            foreach (var opt in this.Options)
+            {
+                builder.AppendLine($"{++index}、{opt}");
+            }
+
+            if (this.Index >= 0)
+            {
+                builder.AppendLine($"参考答案：{this.Options[this.Index]}");
+            }
+            else
+            {
+                builder.AppendLine("找不到答案");
+            }
+            return builder.ToString();
+        }
     }
 }

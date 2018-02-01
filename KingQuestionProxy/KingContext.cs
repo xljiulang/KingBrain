@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace KingQuestionProxy
 {
     /// <summary>
-    /// 表示历史数据
+    /// 表示数据上下文数据
     /// </summary>
-    public class HistoryData
+    public class KingContext
     {
         /// <summary>
         /// 请求内容信息
@@ -20,10 +20,5 @@ namespace KingQuestionProxy
         /// 问题信息
         /// </summary>
         public KingQuestionData QuestionData { get; set; }
-
-        /// <summary>
-        /// 搜索结果信息
-        /// </summary>
-        public SearchResult SearchResult { get; set; }
     }
 }

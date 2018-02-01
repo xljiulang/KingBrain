@@ -72,7 +72,7 @@ namespace KingQuestionProxy
         }
 
         [Route("/GetHtml")]
-        public ActionResult GetHtml([Body] SearchResult model)
+        public ActionResult GetHtml([Body] WsGameAnswer model)
         {
             return this.View("GetHtml", model);
         }
@@ -85,8 +85,8 @@ namespace KingQuestionProxy
         [Route("/Data/Export")]
         public ActionResult ExportData()
         {
-            var disposition = $"attachment;filename={ Path.GetFileName(HistoryDataTable.DataFile)}";
-            return File(HistoryDataTable.DataFile, "application/octet-stream", disposition);
+            var disposition = "attachment;filename=data.db";
+            return File(SqlliteContext.DbFile, "application/octet-stream", disposition);
         }
 
         /// <summary>
@@ -99,9 +99,25 @@ namespace KingQuestionProxy
             if (this.Request.Files.Length > 0)
             {
                 var file = this.Request.Files.First();
-                if (file.FileName.EndsWith("data.json", StringComparison.OrdinalIgnoreCase))
+                if (file.FileName.EndsWith("data.db", StringComparison.OrdinalIgnoreCase))
                 {
-                    HistoryDataTable.TryImport(file);
+                    var dbFile = "import.db";
+                    System.IO.File.WriteAllBytes(dbFile, file.Stream);
+                    using (var sourceDb = new SqlliteContext(dbFile))
+                    {
+                        using (var targetDb = new SqlliteContext())
+                        {
+                            var datas = sourceDb.QuizAnswer.ToArray();
+                            foreach (var data in datas)
+                            {
+                                if (targetDb.QuizAnswer.Any(item => item.Quiz == data.Quiz) == false)
+                                {
+                                    targetDb.QuizAnswer.Add(data);
+                                }
+                            }
+                            targetDb.SaveChanges();
+                        }
+                    }
                 }
             }
 

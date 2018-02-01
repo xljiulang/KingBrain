@@ -85,7 +85,7 @@ namespace KingQuestionProxy
         /// <returns></returns>
         public bool Stop(HostControl hostControl)
         {
-            HistoryDataTable.Save();
+           // HistoryDataTable.Save();
             KingProcesser.CloseListener();
             FiddlerApplication.Shutdown();
             return true;

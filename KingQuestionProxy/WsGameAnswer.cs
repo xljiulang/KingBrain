@@ -12,13 +12,23 @@ namespace KingQuestionProxy
     public class WsGameAnswer
     {
         /// <summary>
-        /// 搜索结果
+        /// 索引
         /// </summary>
-        public SearchResult SearchResult { get; set; }
+        public int Index { get; set; }
+
+        /// <summary>
+        /// 提问
+        /// </summary>
+        public string Quiz { get; set; }
+
+        /// <summary>
+        /// 选项
+        /// </summary>
+        public string[] Options { get; set; }
 
         /// <summary>
         /// 游戏可以点击的延时毫秒数
         /// </summary>
-        public int GameDelayMSeconds { get; set; }
+        public int DelayMilliseconds { get; set; }
     }
 }

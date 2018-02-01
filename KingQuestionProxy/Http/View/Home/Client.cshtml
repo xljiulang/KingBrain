@@ -28,7 +28,7 @@
         };
 
         ws.onmessage = function (e) {
-            var data = JSON.stringify(JSON.parse(e.data).Data.SearchResult);
+            var data = JSON.stringify(JSON.parse(e.data).Data);
             $.ajax({
                 type: "post",
                 url: '/gethtml',

@@ -71,7 +71,6 @@ namespace KingQuestionProxy
             {
                 var notifyData = new WsNotifyData<object> { Cmd = WsCmd.GameOver };
                 WsNotifyByClientIP(notifyData, session.clientIP);
-                HistoryDataTable.Save();
             }
         }
 
@@ -82,56 +81,49 @@ namespace KingQuestionProxy
         /// <param name="session">会话</param>
         private static void SetResponseWithAnswer(Session session)
         {
-            session.utilDecodeRequest();
-            session.utilDecodeResponse();
-
-            var requestBody = Encoding.UTF8.GetString(session.RequestBody);
-            var responseBody = Encoding.UTF8.GetString(session.ResponseBody);
-
-            var kingQuestion = KingQuestion.Parse(responseBody);
-            if (kingQuestion == null || kingQuestion.IsValidate() == false)
+            var beginTime = DateTime.Now;
+            var optionIndex = GetOptionIndex(session, out KingQuestion kingQuestion);
+            if (kingQuestion == null)
             {
                 return;
             }
 
-            var beginTime = DateTime.Now;
-            var data = SearchHistoryData(session);
-
-
             const double offsetSecondes = 3.7d;
-            var delay = beginTime.AddSeconds(offsetSecondes).Subtract(DateTime.Now);
+            var delay = (int)beginTime.AddSeconds(offsetSecondes).Subtract(DateTime.Now).TotalMilliseconds;
+
+            var gameAnswer = new WsGameAnswer
+            {
+                Index = optionIndex,
+                Quiz = kingQuestion.data.quiz,
+                Options = kingQuestion.data.options,
+                DelayMilliseconds = delay
+            };
             var notifyData = new WsNotifyData<WsGameAnswer>
             {
                 Cmd = WsCmd.GameAnser,
-                Data = new WsGameAnswer
-                {
-                    SearchResult = data.SearchResult,
-                    GameDelayMSeconds = (int)delay.TotalMilliseconds
-                }
+                Data = gameAnswer,
             };
             WsNotifyByClientIP(notifyData, session.clientIP);
 
 
-            var qData = data.QuestionData;
-            if (data.SearchResult.Best != null)
+            if (optionIndex > -1)
             {
-                var index = data.SearchResult.Best.Index;
-                qData.quiz = qData.quiz + $" [{(char)('A' + index)}]";
-                qData.options[index] = qData.options[index] + " [√]";
-            }
+                var quizData = kingQuestion.data;
+                quizData.quiz = quizData.quiz + $" [{(char)('A' + optionIndex)}]";
+                quizData.options[optionIndex] = quizData.options[optionIndex] + " [√]";
 
-            var q = new KingQuestion { data = qData };
-            var json = JsonConvert.SerializeObject(q);
-            session.utilSetResponseBody(json);
+                var json = JsonConvert.SerializeObject(kingQuestion);
+                session.utilSetResponseBody(json);
+            }
         }
 
         /// <summary>
         /// 从本地和网络查找答案
-        /// 并转发给对应的ws客户端
+        /// 返回正确选项的索引
         /// </summary>
         /// <param name="session">会话</param>
         /// <returns></returns>
-        private static HistoryData SearchHistoryData(Session session)
+        private static int GetOptionIndex(Session session, out KingQuestion kingQuestion)
         {
             session.utilDecodeRequest();
             session.utilDecodeResponse();
@@ -139,33 +131,45 @@ namespace KingQuestionProxy
             var requestBody = Encoding.UTF8.GetString(session.RequestBody);
             var responseBody = Encoding.UTF8.GetString(session.ResponseBody);
 
-            var kingQuestion = KingQuestion.Parse(responseBody);
+            kingQuestion = KingQuestion.Parse(responseBody);
             if (kingQuestion == null || kingQuestion.IsValidate() == false)
             {
-                return null;
+                kingQuestion = null;
+                return -1;
             }
 
-            var kingRequest = KingRequest.Parse(requestBody);
-            var title = kingQuestion.data.quiz;
-            var beginTime = DateTime.Now;
-            var history = HistoryDataTable.TryGet(title);
-
-            if (history == null)
+            using (var sqlLite = new SqlliteContext())
             {
-                history = new HistoryData
-                {
-                    QuestionData = kingQuestion.data,
-                    KingRequest = KingRequest.Parse(requestBody),
-                    SearchResult = BaiduSearcher.Search(kingQuestion)
-                };
-                HistoryDataTable.TryAdd(history);
-            }
+                var quiz = kingQuestion.data.quiz;
+                var quizAnswer = sqlLite.QuizAnswer.FirstOrDefault(item => item.Quiz == quiz);
 
-            var data = JsonConvert.DeserializeObject<HistoryData>(JsonConvert.SerializeObject(history));
-            data.KingRequest = kingRequest;
-            data.QuestionData = kingQuestion.data;
-            data.SearchResult = history.SearchResult.CreateNewByQuestionData(kingQuestion.data);
-            return data;
+                if (quizAnswer != null)
+                {
+                    return Array.FindIndex(kingQuestion.data.options, item => item == quizAnswer.Answer);
+                }
+
+                var kingRequest = KingRequest.Parse(requestBody);
+                var searchResult = BaiduSearcher.Search(kingQuestion);
+                var context = new KingContext
+                {
+                    KingRequest = kingRequest,
+                    QuestionData = kingQuestion.data
+                };
+                KingContextTable.Add(context);
+
+                var best = searchResult.Best;
+                if (searchResult.Best != null)
+                {
+                    quizAnswer = new QuizAnswer
+                    {
+                        Answer = best.Options,
+                        Quiz = kingQuestion.data.quiz
+                    };
+                    sqlLite.QuizAnswer.Add(quizAnswer);
+                    sqlLite.SaveChanges();
+                }
+                return best == null ? -1 : best.Index;
+            }
         }
 
         /// <summary>
@@ -210,13 +214,27 @@ namespace KingQuestionProxy
 
             var kingRequest = KingRequest.Parse(requestBody);
             var kingAnswer = KingAnswer.Parse(responseBody);
-            if (kingAnswer != null && kingAnswer.data != null)
+
+            if (kingAnswer == null || kingAnswer.data == null)
             {
-                var data = HistoryDataTable.TryGet(kingRequest);
-                if (data != null)
+                return;
+            }
+
+            var context = KingContextTable.GetByRequest(kingRequest);
+            if (context == null)
+            {
+                return;
+            }
+
+            using (var sqlLite = new SqlliteContext())
+            {
+                var quiz = context.QuestionData.quiz;
+                var quizAnswer = sqlLite.QuizAnswer.Find(quiz);
+                var answer = context.QuestionData.options[kingAnswer.data.answer - 1];
+                if (quizAnswer != null)
                 {
-                    var index = kingAnswer.data.answer - 1;
-                    data.SearchResult.Best = data.SearchResult.Options[index];
+                    quizAnswer.Answer = answer;
+                    sqlLite.SaveChanges();
                 }
             }
         }

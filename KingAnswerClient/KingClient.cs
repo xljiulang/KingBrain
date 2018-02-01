@@ -49,19 +49,18 @@ namespace KingAnswerClient
 
             if (notify.Cmd == WsCmd.GameAnser)
             {
-                var searchResult = notify.Data.SearchResult;
-                Console.WriteLine(searchResult);
+                var gameAnswer = notify.Data;
+                Console.WriteLine(gameAnswer);
 
-                if (searchResult.Best != null)
+                if (gameAnswer.Index >= 0)
                 {
-                    var index = searchResult.Best.Index;
-                    var delay = TimeSpan.FromMilliseconds(notify.Data.GameDelayMSeconds);
-                    await this.AutotapOptionsAsync(index, delay, TimeSpan.FromSeconds(0.5d));
+                    var delay = TimeSpan.FromMilliseconds(gameAnswer.DelayMilliseconds);
+                    await this.AutotapOptionsAsync(gameAnswer.Index, delay, TimeSpan.FromSeconds(0.5d));
                 }
                 else
                 {
                     var index = new Random().Next(0, 3);
-                    var delay = TimeSpan.FromMilliseconds(notify.Data.GameDelayMSeconds + 4000);
+                    var delay = TimeSpan.FromMilliseconds(gameAnswer.DelayMilliseconds + 4000);
                     await this.AutotapOptionsAsync(index, delay);
                 }
                 Console.WriteLine();

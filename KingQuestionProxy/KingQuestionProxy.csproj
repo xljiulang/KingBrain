@@ -23,9 +23,11 @@
 
   <ItemGroup>
     <PackageReference Include="CsQuery" Version="1.3.4" />
+    <PackageReference Include="EntityFramework" Version="6.2.0" />
     <PackageReference Include="FiddlerCore2" Version="1.0.0" />
     <PackageReference Include="Laojiu.WebApiClient" Version="1.1.3" />
-    <PackageReference Include="NetworkSocket" Version="1.7.2" />  
+    <PackageReference Include="NetworkSocket" Version="1.7.2" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.107" />
     <PackageReference Include="System.Security.Cryptography.Cng" Version="4.4.0" />  
     <PackageReference Include="Topshelf" Version="4.0.3" />
   </ItemGroup>
@@ -52,6 +54,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Cert\rootCert.key">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\data.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Http\Libs\bootstrap.min.css">
