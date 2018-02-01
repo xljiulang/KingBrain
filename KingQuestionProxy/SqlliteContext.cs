@@ -40,8 +40,9 @@ namespace KingQuestionProxy
         /// sqllite数据库上下文
         /// </summary>
         /// <param name="dbFile">db文件路径</param>
-        public SqlliteContext(string dbFile)
-            : base(CreateConnection(dbFile), true)
+        /// <param name="pooling">pool连接方式</param>
+        public SqlliteContext(string dbFile, bool pooling = true)
+            : base(CreateConnection(dbFile, pooling), true)
         {
         }
 
@@ -49,10 +50,11 @@ namespace KingQuestionProxy
         /// 创建连接
         /// </summary>
         /// <param name="dbFile"></param>
+        /// <param name="pooling">pool连接方式</param>
         /// <returns></returns>
-        private static SQLiteConnection CreateConnection(string dbFile)
+        private static SQLiteConnection CreateConnection(string dbFile, bool pooling)
         {
-            var constring = $"Data Source={dbFile};Pooling=True";
+            var constring = $"Data Source={dbFile};Pooling={pooling}";
             return new SQLiteConnection(constring);
         }
 

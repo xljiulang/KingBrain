@@ -100,10 +100,10 @@ namespace KingQuestionProxy
                 return this.RedirectToIndex();
             }
 
-            var dbFile = "data\\import.db";
+            var dbFile = $"data\\import_{Environment.TickCount}.db";
             System.IO.File.WriteAllBytes(dbFile, file.Stream);
 
-            using (var sourceDb = new SqlliteContext(dbFile))
+            using (var sourceDb = new SqlliteContext(dbFile, false))
             {
                 using (var targetDb = new SqlliteContext())
                 {
@@ -115,7 +115,7 @@ namespace KingQuestionProxy
                             targetDb.QuizAnswer.Add(data);
                         }
                     }
-                    await targetDb.SaveChangesAsync();
+                    var count = await targetDb.SaveChangesAsync();
                 }
             }
 
