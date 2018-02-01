@@ -162,7 +162,8 @@ namespace KingQuestionProxy
 
                 if (quizAnswer != null)
                 {
-                    return Array.FindIndex(kingQuestion.data.options, item => item == quizAnswer.Answer);
+                    var answer = quizAnswer.Answer?.Trim();
+                    return Array.FindIndex(kingQuestion.data.options, item => item?.Trim() == answer);
                 }
 
                 // 搜索
