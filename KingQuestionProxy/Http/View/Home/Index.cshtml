@@ -28,13 +28,13 @@
     <h3>使用教程</h3>
     <ol>
         <li>
-            <a href="/cert/client.cer">在手机点击下载安装证书</a>
+            <span>给手机wifi网络设置自动代理：http://@(Model.ProxyIpEndpoint)/proxy.pac</span>
         </li>
         <li>
-            <span>给手机网络设置自动代理：http://@(Model.ProxyIpEndpoint)/proxy.pac</span>
+            <span>在手机访问此页面，</span> <a href="/cert/client.cer">点击下载安装证书</a><span>到手机端</span>
         </li>
         <li>
-            <span>进入头脑王者小程序开局，正确的选项卡会打√</span>
+            <span>进入头脑王者小程序开战，正确的选项卡会打√</span>
         </li>
     </ol>
 
@@ -65,13 +65,13 @@
         </li>
 
         <li>
-            <a href="/data/export">导出作题数据</a>
+            <a href="/data/export">导出历史题目</a>
         </li>
 
         <li>
             <form enctype="multipart/form-data" method="post" action="/data/import">
-                <input name="file" type="file" value="请选择data.json文件" />
-                <button type="submit">导入作题数据</button>
+                <input name="file" type="file" />
+                <button type="submit">导入题目资料</button>
             </form>
         </li>
     </ol>

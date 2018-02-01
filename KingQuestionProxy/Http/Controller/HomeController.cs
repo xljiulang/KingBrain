@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Data.Entity;
+using System.Net.NetworkInformation;
 
 namespace KingQuestionProxy
 {
@@ -31,10 +32,11 @@ namespace KingQuestionProxy
                             where string.IsNullOrEmpty(ip) == false
                             select ip;
 
+            var proxyHost = this.GetProxyHost();
             var model = new IndexModel
             {
-                ProxyIpEndpoint = $"{this.Request.Url.Host}:{AppConfig.ProxyPort}",
-                WsIpEndpoint = $"{this.Request.Url.Host}:{AppConfig.WsPort}",
+                ProxyIpEndpoint = $"{proxyHost}:{AppConfig.ProxyPort}",
+                WsIpEndpoint = $"{proxyHost}:{AppConfig.WsPort}",
                 ClientsIp = clientsIp.Distinct().ToArray()
             };
 
@@ -171,6 +173,27 @@ namespace KingQuestionProxy
         {
             Console.WriteLine(filterContext.Exception);
             base.OnException(filterContext);
+        }
+
+        /// <summary>
+        /// 返回代理服务器绝对域名
+        /// </summary>
+        /// <returns></returns>
+        private string GetProxyHost()
+        {
+            var ipArray = from i in NetworkInterface.GetAllNetworkInterfaces()
+                          where i.OperationalStatus == OperationalStatus.Up
+                          let address = i.GetIPProperties().UnicastAddresses
+                          select address.ToArray();
+
+            var networkIps = from ip in ipArray.SelectMany(item => item)
+                             where ip.DuplicateAddressDetectionState == DuplicateAddressDetectionState.Preferred
+                             where ip.PrefixOrigin == PrefixOrigin.Dhcp || ip.PrefixOrigin == PrefixOrigin.Manual
+                             where ip.SuffixOrigin == SuffixOrigin.OriginDhcp || ip.SuffixOrigin == SuffixOrigin.Manual
+                             select ip;
+
+            var networkIp = networkIps.FirstOrDefault();
+            return networkIp == null ? this.Request.Url.Host : networkIp.Address.ToString();
         }
     }
 }
