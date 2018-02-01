@@ -167,12 +167,13 @@ namespace KingQuestionProxy
                     return -1;
                 }
 
-                if (sqlLite.QuizAnswer.Any(item => item.Quiz == kingQuestion.data.quiz) == false)
+
+                if (sqlLite.QuizAnswer.Any(item => item.Quiz == quiz) == false)
                 {
                     sqlLite.QuizAnswer.Add(new QuizAnswer
                     {
                         Answer = best.Options,
-                        Quiz = kingQuestion.data.quiz,
+                        Quiz = quiz,
                         OptionsJson = JsonConvert.SerializeObject(kingQuestion.data.options)
                     });
                     sqlLite.SaveChanges();

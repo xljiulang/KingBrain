@@ -13,6 +13,7 @@ using WebApiClient;
 using System.Net.Http;
 using Topshelf;
 using System.Diagnostics;
+using System.Net;
 
 namespace KingQuestionProxy
 {
@@ -62,9 +63,15 @@ namespace KingQuestionProxy
             // 收到服务端的回复
             FiddlerApplication.BeforeResponse += (session) =>
             {
-                KingProcesser.ProcessSession(session);
+                try
+                {
+                    KingProcesser.ProcessSession(session);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             };
-
 
             // 配置代理服务器
             Cert.SetRootCertificate();
