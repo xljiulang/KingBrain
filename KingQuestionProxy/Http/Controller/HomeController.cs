@@ -116,6 +116,7 @@ namespace KingQuestionProxy
                         }
                     }
                     var count = await targetDb.SaveChangesAsync();
+                    Console.WriteLine($"成功的导入了{count}条数据..");
                 }
             }
 

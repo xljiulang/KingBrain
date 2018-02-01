@@ -20,9 +20,13 @@ namespace KingQuestionProxy
 
         public override void Write(char[] buffer, int index, int count)
         {
+            var log = new string(buffer, index, count);
+            var timeLog = $"{DateTime.Now } {log}";
+
+            buffer = $"{DateTime.Now } {log}".ToCharArray();
             foreach (var item in this.writer)
             {
-                item.Write(buffer, index, count);
+                item.Write(buffer, 0, buffer.Length);
             }
         }
     }

@@ -40,7 +40,7 @@ namespace KingQuestionProxy
             // 请求前
             FiddlerApplication.BeforeRequest += (session) =>
             {
-                Console.WriteLine($"{session.clientIP} {session.fullUrl}");
+                Console.WriteLine($"{session.clientIP}->{session.fullUrl}");
                 session.bBufferResponse = true;
 
                 // 首页重定向
@@ -56,6 +56,7 @@ namespace KingQuestionProxy
                 }
                 else
                 {
+                    Console.WriteLine($"拒绝了{session.clientIP}的连接");
                     session.Abort();
                 }
             };

@@ -23,6 +23,8 @@ namespace KingQuestionProxy
         {
             var ipAddress = (session.RemoteEndPoint as IPEndPoint).Address.ToString();
             session.Tag.Set("ip", ipAddress);
+
+            Console.WriteLine($"websocket客户端{ipAddress}连接过来..");
             base.OnSetProtocolWrapper(session, wrapper);
         }
 
@@ -34,6 +36,7 @@ namespace KingQuestionProxy
         protected override void OnText(IContenxt context, FrameRequest frame)
         {
             var ipAddress = Encoding.UTF8.GetString(frame.Content);
+            Console.WriteLine($"websocket客户端将ip绑定到{ipAddress}");
             context.Session.Tag.Set("ip", ipAddress);
         }
     }
