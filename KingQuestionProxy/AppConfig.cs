@@ -23,6 +23,11 @@ namespace KingQuestionProxy
         public static readonly int WsPort = int.Parse(ConfigurationManager.AppSettings["WsPort"]);
 
         /// <summary>
+        /// 是否在响应给手机端时附加答案
+        /// </summary>
+        public static readonly bool ResponseAnswer = ConfigurationManager.AppSettings["ResponseAnswer"] == "true";
+
+        /// <summary>
         /// 走代理的host
         /// </summary>
         public static readonly string[] ProxyHosts;
@@ -37,7 +42,7 @@ namespace KingQuestionProxy
         /// </summary>
         static AppConfig()
         {
-            var section = ConfigurationManager.GetSection("PacConfig") as ProxyConfigSection;
+            var section = ConfigurationManager.GetSection("proxyConfig") as ProxyConfigSection;
             proxyPacOnly = section.ProxyPacOnly;
             ProxyHosts = section.PAC.Cast<PacItem>().Select(item => item.host).ToArray();
         }

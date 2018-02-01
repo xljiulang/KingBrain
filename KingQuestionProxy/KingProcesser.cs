@@ -107,7 +107,7 @@ namespace KingQuestionProxy
 
 
             // 改写响应结果
-            if (optionIndex > -1)
+            if (AppConfig.ResponseAnswer == true && optionIndex > -1)
             {
                 var quizData = kingQuestion.data;
                 quizData.quiz = quizData.quiz + $" 老九提示：[{(char)('A' + optionIndex)}]";
