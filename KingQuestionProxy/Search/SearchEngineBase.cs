@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace KingQuestionProxy.Search
@@ -41,7 +42,7 @@ namespace KingQuestionProxy.Search
         public virtual BestOption Search(KingQuestion kingQuestion)
         {
             // 从badidu找出原始结论
-            var quiz = kingQuestion.data.quiz;
+            var quiz = this.ClearNot(kingQuestion.data.quiz, out bool clearNot);
             var sourceAnswer = this.SearchSourceAnswers(quiz, trys: 1);
             if (sourceAnswer == null || sourceAnswer.Length == 0)
             {
@@ -57,13 +58,9 @@ namespace KingQuestionProxy.Search
                 Score = this.GetMatchScore(sourceAnswer, opt)
             }).ToArray();
 
-            var best = options.OrderByDescending(item => item.Score).FirstOrDefault();
-            if (quiz.Contains("不") || quiz.Contains("没"))
-            {
-                // 计算匹配次数平均值，找出和匹配次数均值差异最大的
-                var avg = options.Average(item => item.Score);
-                best = options.OrderByDescending(item => Math.Abs(item.Score - avg)).FirstOrDefault();
-            }
+            var best = clearNot ?
+                options.OrderBy(item => item.Score).FirstOrDefault() :
+                options.OrderByDescending(item => item.Score).FirstOrDefault();
 
             // 两个相同的结果，表示没有答案
             const int digits = 5;
@@ -77,6 +74,24 @@ namespace KingQuestionProxy.Search
                 Index = best.Index,
                 Option = best.Option
             };
+        }
+
+        /// <summary>
+        /// 清除反语
+        /// </summary>
+        /// <param name="quiz"></param>
+        /// <param name="clear"></param>
+        /// <returns></returns>
+        private string ClearNot(string quiz, out bool clear)
+        {
+            var state = false;
+            quiz = Regex.Replace(quiz, @"不是|没有|不属于", m =>
+            {
+                state = true;
+                return "是";
+            });
+            clear = state;
+            return quiz;
         }
 
         /// <summary>
