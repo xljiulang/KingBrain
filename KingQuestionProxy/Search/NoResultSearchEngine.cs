@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace KingQuestionProxy.Search
 {
+    /// <summary>
+    /// 返回null结果的搜索引擎
+    /// </summary>
     class NoResultSearchEngine : SearchEngineBase
     {
         public override BestOption Search(KingQuestion kingQuestion)

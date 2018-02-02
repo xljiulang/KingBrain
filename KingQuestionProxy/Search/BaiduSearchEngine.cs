@@ -10,13 +10,12 @@ using System.Threading.Tasks;
 namespace KingQuestionProxy.Search
 {
     /// <summary>
-    /// 百度搜索工具
+    /// 百度搜索索引
     /// </summary>
     public class BaiduSearchEngine : SearchEngineBase
     {
         /// <summary>
         /// 找class="c-abstract"的标签的文本
-        /// 就是原始参数答案
         /// </summary>
         /// <param name="quiz">问题</param>
         /// <returns></returns>

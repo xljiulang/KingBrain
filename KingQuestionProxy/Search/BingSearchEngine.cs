@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace KingQuestionProxy.Search
 {
+    /// <summary>
+    /// Bing中国搜索引擎
+    /// </summary>
     class BingSearchEngine : SearchEngineBase
     {
         protected override string[] SearchSourceAnswers(string quiz)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -49,6 +50,22 @@ namespace KingQuestionProxy
                 .AppendLine(this.Quiz)
                 .AppendLine(this.Answer)
                 .ToString();
+        }
+
+        /// <summary>
+        /// 转换为问题
+        /// </summary>
+        /// <returns></returns>
+        public KingQuestion ToKingQuestion()
+        {
+            return new KingQuestion
+            {
+                data = new KingQuestionData
+                {
+                    quiz = this.Quiz,
+                    options = JsonConvert.DeserializeObject<string[]>(this.OptionsJson),
+                }
+            };
         }
     }
 }

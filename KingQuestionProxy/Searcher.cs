@@ -12,6 +12,7 @@ namespace KingQuestionProxy
 {
     /// <summary>
     /// 提供提问的搜索
+    /// 多搜索引擎
     /// </summary>
     static class Searcher
     {
@@ -27,9 +28,9 @@ namespace KingQuestionProxy
         {
             var engines = new ISearchEngine[]
             {
-                new BaiduSearchEngine(),
-                new BingSearchEngine(),                
-                new ZhidaoSearchEngine(),
+                new BaiduSearchEngine{ MatchMode= MatchMode.Accurate },
+                new BingSearchEngine{ MatchMode= MatchMode.Fuzzy },
+                new ZhidaoSearchEngine{ MatchMode= MatchMode.Fuzzy },
                 new NoResultSearchEngine()
             };
 

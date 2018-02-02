@@ -17,6 +17,11 @@ namespace KingQuestionProxy.Search
         public ISearchEngine Next { get; private set; }
 
         /// <summary>
+        /// 获取或设置匹配模式
+        /// </summary>
+        public MatchMode MatchMode { get; set; }
+
+        /// <summary>
         /// 设置下一个引擎
         /// </summary>
 
@@ -37,7 +42,7 @@ namespace KingQuestionProxy.Search
         {
             // 从badidu找出原始结论
             var quiz = kingQuestion.data.quiz;
-            var sourceAnswer = this.SearchSourceAnswers(quiz, trys: 3);
+            var sourceAnswer = this.SearchSourceAnswers(quiz, trys: 1);
             if (sourceAnswer == null || sourceAnswer.Length == 0)
             {
                 return this.Next.Search(kingQuestion);
@@ -49,7 +54,7 @@ namespace KingQuestionProxy.Search
             {
                 Index = i,
                 Option = opt,
-                Matchs = this.GetMatchCount(sourceAnswer, opt)
+                Matchs = this.GetMatchScore(sourceAnswer, opt)
             }).ToArray();
 
             var best = options.OrderByDescending(item => item.Matchs).FirstOrDefault();
@@ -57,16 +62,16 @@ namespace KingQuestionProxy.Search
             {
                 // 计算匹配次数平均值，找出和匹配次数均值差异最大的
                 var avg = options.Average(item => item.Matchs);
-                best = options.OrderByDescending(item => Math.Pow(item.Matchs - avg, 2)).FirstOrDefault();
+                best = options.OrderByDescending(item => Math.Abs(item.Matchs - avg)).FirstOrDefault();
             }
 
             // 两个相同的结果，表示没有答案
-            if (options.Any(item => item != best && item.Matchs == best.Matchs))
+            const int digits = 5;
+            if (options.Any(item => item != best && Math.Round(item.Matchs, digits) == Math.Round(best.Matchs, digits)))
             {
                 return this.Next.Search(kingQuestion);
             }
 
-            Console.WriteLine("------"+this.GetType().Name);
             return new BestOption
             {
                 Index = best.Index,
@@ -75,16 +80,52 @@ namespace KingQuestionProxy.Search
         }
 
         /// <summary>
-        /// 返回选项与原始答案的匹配次数
+        /// 返回选项与原始答案的匹配度
         /// </summary>
         /// <param name="sourcesAnswers">原始答案</param>
         /// <param name="options">选项</param>
         /// <returns></returns>
-        protected virtual int GetMatchCount(string[] sourcesAnswers, string options)
+        protected virtual decimal GetMatchScore(string[] sourcesAnswers, string options)
         {
-            var fixOptions = options.Trim('《', '》', '<', '>');
-            return sourcesAnswers.Count(item => item.Contains(fixOptions));
+            if (this.MatchMode == MatchMode.Accurate)
+            {
+                var fixOptions = options.Trim('《', '》', '<', '>').Trim();
+                return sourcesAnswers.Count(item => item.Contains(fixOptions));
+            }
+            else
+            {
+                return sourcesAnswers.Average(item => this.GetSimilarityWith(item, options));
+            }
         }
+
+        /// <summary>
+        /// 获取和目标字符串的相似度
+        /// </summary>
+        /// <param name="source">源</param>
+        /// <param name="target">目标字符串</param>
+        /// <returns></returns>
+        private decimal GetSimilarityWith(string source, string target)
+        {
+            if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(target))
+            {
+                return 0m;
+            }
+
+            const decimal Kq = 2m;
+            const decimal Kr = 1m;
+            const decimal Ks = 1m;
+
+            var sourceArray = source.ToCharArray();
+            var destArray = target.ToCharArray();
+
+            //获取交集数量
+            var q = sourceArray.Intersect(destArray).Count();
+            var s = sourceArray.Length - q;
+            var r = destArray.Length - q;
+
+            return Kq * q / (Kq * q + Kr * r + Ks * s);
+        }
+
 
         /// <summary>
         /// 找class="c-abstract"的标签的文本
@@ -95,7 +136,7 @@ namespace KingQuestionProxy.Search
         /// <returns></returns>
         private string[] SearchSourceAnswers(string quiz, int trys)
         {
-            for (var i = 0; i < trys; i++)
+            for (var i = 0; i <= trys; i++)
             {
                 try
                 {
