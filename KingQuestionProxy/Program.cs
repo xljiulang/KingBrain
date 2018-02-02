@@ -50,22 +50,33 @@ namespace KingQuestionProxy
                 var question = item.ToKingQuestion();
 
                 var best = Searcher.Search(question);
-                if (best?.Option == item.Answer)
+                var isCorrect = best?.Option == item.Answer;
+
+                if (isCorrect == true)
                 {
                     Interlocked.Increment(ref correct);
                 }
 
                 lock (syncRoot)
                 {
-                    var correctRrate = ((double)correct / (double)current * 100d).ToString("0.00");
                     Console.WriteLine(item.Quiz);
+
+                    if (isCorrect == false)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                    }
                     Console.WriteLine($"猜测答案：{best?.Option}");
                     Console.WriteLine($"正确答案：{item.Answer}");
+                    if (isCorrect == false)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                    }
+
+                    var correctRrate = ((double)correct / (double)current * 100d).ToString("0.00");
                     Console.Title = $"进度：{current}/{datas.Length}  准确率：{correctRrate}%";
                     Console.WriteLine();
                 }
             });
-
         }
     }
 }

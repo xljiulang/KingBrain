@@ -54,20 +54,20 @@ namespace KingQuestionProxy.Search
             {
                 Index = i,
                 Option = opt,
-                Matchs = this.GetMatchScore(sourceAnswer, opt)
+                Score = this.GetMatchScore(sourceAnswer, opt)
             }).ToArray();
 
-            var best = options.OrderByDescending(item => item.Matchs).FirstOrDefault();
+            var best = options.OrderByDescending(item => item.Score).FirstOrDefault();
             if (quiz.Contains("不") || quiz.Contains("没"))
             {
                 // 计算匹配次数平均值，找出和匹配次数均值差异最大的
-                var avg = options.Average(item => item.Matchs);
-                best = options.OrderByDescending(item => Math.Abs(item.Matchs - avg)).FirstOrDefault();
+                var avg = options.Average(item => item.Score);
+                best = options.OrderByDescending(item => Math.Abs(item.Score - avg)).FirstOrDefault();
             }
 
             // 两个相同的结果，表示没有答案
             const int digits = 5;
-            if (options.Any(item => item != best && Math.Round(item.Matchs, digits) == Math.Round(best.Matchs, digits)))
+            if (options.Any(item => item != best && Math.Round(item.Score, digits) == Math.Round(best.Score, digits)))
             {
                 return this.Next.Search(kingQuestion);
             }
@@ -90,7 +90,7 @@ namespace KingQuestionProxy.Search
             if (this.MatchMode == MatchMode.Accurate)
             {
                 var fixOptions = options.Trim('《', '》', '<', '>').Trim();
-                return sourcesAnswers.Count(item => item.Contains(fixOptions));
+                return sourcesAnswers.Count(item => item.IndexOf(fixOptions, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             else
             {
@@ -119,7 +119,7 @@ namespace KingQuestionProxy.Search
             var destArray = target.ToCharArray();
 
             //获取交集数量
-            var q = sourceArray.Intersect(destArray).Count();
+            var q = sourceArray.Intersect(destArray, CharComparer.Instance).Count();
             var s = sourceArray.Length - q;
             var r = destArray.Length - q;
 
@@ -156,5 +156,26 @@ namespace KingQuestionProxy.Search
         /// <param name="quiz">问题</param>
         /// <returns></returns>
         protected abstract string[] SearchSourceAnswers(string quiz);
+
+        /// <summary>
+        /// 字符比较器
+        /// </summary>
+        private class CharComparer : IEqualityComparer<char>
+        {
+            /// <summary>
+            /// 唯一实例
+            /// </summary>
+            public static readonly CharComparer Instance = new CharComparer();
+
+            public bool Equals(char x, char y)
+            {
+                return char.ToUpper(x) == char.ToUpper(y);
+            }
+
+            public int GetHashCode(char obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
     }
 }
