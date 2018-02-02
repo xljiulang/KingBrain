@@ -1,61 +1,77 @@
-﻿using CsQuery;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KingQuestionProxy
+namespace KingQuestionProxy.Search
 {
     /// <summary>
-    /// 百度搜索工具
+    /// 表示搜索引擎抽象类
     /// </summary>
-    static class BaiduSearcher
+    public abstract class SearchEngineBase : ISearchEngine
     {
+        /// <summary>
+        /// 获取下一个引擎
+        /// </summary>
+        public ISearchEngine Next { get; private set; }
+
+        /// <summary>
+        /// 设置下一个引擎
+        /// </summary>
+
+        ISearchEngine ISearchEngine.Next
+        {
+            set
+            {
+                this.Next = value;
+            }
+        }
+
         /// <summary>
         /// 搜索问题
         /// </summary>
-        /// <param name="question">问题</param>
+        /// <param name="kingQuestion">问题</param>
         /// <returns></returns>
-        public static SearchResult Search(KingQuestion question)
+        public virtual BestOption Search(KingQuestion kingQuestion)
         {
             // 从badidu找出原始结论
-            var title = question.data.quiz;
-            var sourceAnswer = SearchSourceAnswers(title, trys: 3);
+            var quiz = kingQuestion.data.quiz;
+            var sourceAnswer = this.SearchSourceAnswers(quiz, trys: 3);
+            if (sourceAnswer == null || sourceAnswer.Length == 0)
+            {
+                return this.Next.Search(kingQuestion);
+            }
 
             // 各个选项和结论的匹配次数
-            var options = question.data.options.Select((item, i) => new OptionMatchs
+            var opts = kingQuestion.data.options;
+            var options = opts.Select((opt, i) => new
             {
                 Index = i,
-                Options = item,
-                Matchs = GetMatchCount(sourceAnswer, item)
+                Option = opt,
+                Matchs = this.GetMatchCount(sourceAnswer, opt)
             }).ToArray();
 
             var best = options.OrderByDescending(item => item.Matchs).FirstOrDefault();
-            if (title.Contains("不") || title.Contains("没"))
+            if (quiz.Contains("不") || quiz.Contains("没"))
             {
                 // 计算匹配次数平均值，找出和匹配次数均值差异最大的
                 var avg = options.Average(item => item.Matchs);
                 best = options.OrderByDescending(item => Math.Pow(item.Matchs - avg, 2)).FirstOrDefault();
             }
 
-            var result = new SearchResult
-            {
-                Title = title,
-                Options = options,
-                Best = best
-            };
-
             // 两个相同的结果，表示没有答案
             if (options.Any(item => item != best && item.Matchs == best.Matchs))
             {
-                result.Best = null;
+                return this.Next.Search(kingQuestion);
             }
 
-            Console.WriteLine(result);
-            return result;
+            Console.WriteLine("------"+this.GetType().Name);
+            return new BestOption
+            {
+                Index = best.Index,
+                Option = best.Option
+            };
         }
 
         /// <summary>
@@ -64,7 +80,7 @@ namespace KingQuestionProxy
         /// <param name="sourcesAnswers">原始答案</param>
         /// <param name="options">选项</param>
         /// <returns></returns>
-        private static int GetMatchCount(string[] sourcesAnswers, string options)
+        protected virtual int GetMatchCount(string[] sourcesAnswers, string options)
         {
             var fixOptions = options.Trim('《', '》', '<', '>');
             return sourcesAnswers.Count(item => item.Contains(fixOptions));
@@ -74,16 +90,16 @@ namespace KingQuestionProxy
         /// 找class="c-abstract"的标签的文本
         /// 就是原始参数答案
         /// </summary>
-        /// <param name="question"></param>
+        /// <param name="quiz"></param>
         /// <param name="trys">尝试次数</param>
         /// <returns></returns>
-        private static string[] SearchSourceAnswers(string question, int trys)
+        private string[] SearchSourceAnswers(string quiz, int trys)
         {
             for (var i = 0; i < trys; i++)
             {
                 try
                 {
-                    return SearchSourceAnswers(question);
+                    return SearchSourceAnswers(quiz);
                 }
                 catch (Exception ex)
                 {
@@ -94,20 +110,10 @@ namespace KingQuestionProxy
         }
 
         /// <summary>
-        /// 找class="c-abstract"的标签的文本
-        /// 就是原始参数答案
+        /// 找原始参数答案
         /// </summary>
-        /// <param name="question">问题</param>
+        /// <param name="quiz">问题</param>
         /// <returns></returns>
-        private static string[] SearchSourceAnswers(string question)
-        {
-            using (var client = new WebClient())
-            {
-                var address = $"http://www.baidu.com/s?ie=utf-8&wd={question}";
-                var html = client.DownloadData(address);
-                CQ cQ = Encoding.UTF8.GetString(html);
-                return cQ.Find(".c-abstract").Select(item => item.Cq().Text()).ToArray();
-            }
-        }
+        protected abstract string[] SearchSourceAnswers(string quiz);
     }
 }

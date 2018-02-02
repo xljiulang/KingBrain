@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace KingQuestionProxy.Search
 {
-    class LiZhiSearchEngine : SearchEngine
+    class BingSearchEngine : SearchEngineBase
     {
-        protected override string[] SearchSourceAnswers(string question)
+        protected override string[] SearchSourceAnswers(string quiz)
         {
             using (var client = new WebClient())
             {
-                var address = $"https://www.sogou.com/web?query={question}";
+                var address = $"http://cn.bing.com/search?q={quiz}";
                 var html = client.DownloadData(address);
                 CQ cQ = Encoding.UTF8.GetString(html);
-                return cQ.Find("#lizhi_long_wrapper .txt-box").Select(item => item.Cq().Text()).ToArray();
+                return cQ.Find(".b_caption>p").Select(item => item.Cq().Text()).ToArray();
             }
         }
     }

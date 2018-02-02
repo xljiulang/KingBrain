@@ -20,5 +20,14 @@ namespace KingQuestionProxy
         /// 选项内容
         /// </summary>
         public string Option { get; set; }
+
+        /// <summary>
+        /// 转换为字符串
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return this.Option;
+        }
     }
 }

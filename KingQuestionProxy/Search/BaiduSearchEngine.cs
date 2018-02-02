@@ -12,19 +12,19 @@ namespace KingQuestionProxy.Search
     /// <summary>
     /// 百度搜索工具
     /// </summary>
-    public class BaiduSearchEngine : SearchEngine
+    public class BaiduSearchEngine : SearchEngineBase
     {
         /// <summary>
         /// 找class="c-abstract"的标签的文本
         /// 就是原始参数答案
         /// </summary>
-        /// <param name="question">问题</param>
+        /// <param name="quiz">问题</param>
         /// <returns></returns>
-        protected override string[] SearchSourceAnswers(string question)
+        protected override string[] SearchSourceAnswers(string quiz)
         {
             using (var client = new WebClient())
             {
-                var address = $"http://www.baidu.com/s?ie=utf-8&wd={question}";
+                var address = $"http://www.baidu.com/s?ie=utf-8&wd={quiz}";
                 var html = client.DownloadData(address);
                 CQ cQ = Encoding.UTF8.GetString(html);
                 return cQ.Find(".c-abstract").Select(item => item.Cq().Text()).ToArray();

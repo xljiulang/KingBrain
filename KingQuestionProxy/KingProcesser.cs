@@ -163,7 +163,7 @@ namespace KingQuestionProxy
                 }
 
                 // 搜索
-                var best = BaiduSearcher.Search(kingQuestion).Best;
+                var best = Searcher.Search(kingQuestion);
                 if (best == null)
                 {
                     return -1;
@@ -174,7 +174,7 @@ namespace KingQuestionProxy
                 {
                     sqlLite.QuizAnswer.Add(new QuizAnswer
                     {
-                        Answer = best.Options,
+                        Answer = best.Option,
                         Quiz = quiz,
                         OptionsJson = JsonConvert.SerializeObject(kingQuestion.data.options)
                     });

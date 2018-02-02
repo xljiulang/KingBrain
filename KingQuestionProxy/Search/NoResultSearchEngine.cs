@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KingQuestionProxy.Search
 {
-    class NoResultSearchEngine : SearchEngine
+    class NoResultSearchEngine : SearchEngineBase
     {
         public override BestOption Search(KingQuestion kingQuestion)
         {
