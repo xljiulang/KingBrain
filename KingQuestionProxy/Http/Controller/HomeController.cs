@@ -27,17 +27,12 @@ namespace KingQuestionProxy
         [Route("/")]
         public ActionResult Index()
         {
-            var clientsIp = from session in FiddlerApp.AllSessions
-                            let ip = Regex.Match(session.clientIP, @"\d+\.\d+\.\d+\.\d+").Value
-                            where string.IsNullOrEmpty(ip) == false
-                            select ip;
-
             var proxyHost = this.GetProxyHost();
             var model = new IndexModel
             {
                 ProxyIpEndpoint = $"{proxyHost}:{AppConfig.ProxyPort}",
                 WsIpEndpoint = $"{proxyHost}:{AppConfig.WsPort}",
-                ClientsIp = clientsIp.Distinct().ToArray()
+                ClientsIp = UserList.GetUserIpAddress()
             };
 
             return this.View("Index", model);
@@ -129,14 +124,25 @@ namespace KingQuestionProxy
         /// </summary>
         /// <returns></returns>
         [Route("/Proxy.PAC")]
-        public ActionResult Proxy_PAC()
+        public ActionResult Proxy_PAC(string u)
         {
+            var userOk = false;
+            if (string.IsNullOrEmpty(u) == false)
+            {
+                var clientIp = Request.Headers.TryGet<string>("ClientIpAddress");
+                userOk = UserList.UpdateIpAddress(u, clientIp);
+                Console.WriteLine($"用户登录：{u} ip为{clientIp}");
+            }
+
             var buidler = new StringBuilder();
             buidler.AppendLine("function FindProxyForURL(url, host){");
-            buidler.AppendLine($"    var proxy = 'PROXY {this.Request.Url.Host}:{AppConfig.ProxyPort}';");
-            foreach (var host in AppConfig.ProxyHosts)
+            if (userOk == true)
             {
-                buidler.AppendLine($"    if (dnsDomainIs(host, '{host}')) return proxy;");
+                buidler.AppendLine($"    var proxy = 'PROXY {this.Request.Url.Host}:{AppConfig.ProxyPort}';");
+                foreach (var host in AppConfig.ProxyHosts)
+                {
+                    buidler.AppendLine($"    if (dnsDomainIs(host, '{host}')) return proxy;");
+                }
             }
             buidler.AppendLine("    return 'DIRECT';");
             buidler.AppendLine("}");

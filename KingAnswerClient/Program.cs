@@ -2,7 +2,9 @@
 using System.Configuration;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 
 namespace KingAnswerClient
 {
@@ -24,10 +26,17 @@ namespace KingAnswerClient
 
             while (true)
             {
-                Console.WriteLine("请输入手机使用的IP：");
+                Console.WriteLine("请输入手机使用的IP，按Enter使用外网IP：");
 
                 IPAddress ip;
                 var ipAddress = Console.ReadLine();
+                if (string.IsNullOrEmpty(ipAddress))
+                {
+                    var html = new WebClient().DownloadString("http://2017.ip138.com/ic.asp");
+                    ipAddress = Regex.Match(html, @"\d+\.\d+\.\d+\.\d+").Value;
+                    Console.WriteLine(ipAddress);
+                }
+
                 if (IPAddress.TryParse(ipAddress, out ip) == false)
                 {
                     Console.WriteLine("IP格式错误");

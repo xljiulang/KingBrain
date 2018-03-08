@@ -28,7 +28,7 @@
     <h3>使用教程</h3>
     <ol>
         <li>
-            <span>给手机wifi网络设置自动代理：http://@(Model.ProxyIpEndpoint)/proxy.pac</span>
+            <span>给手机wifi网络设置自动代理：http://@(Model.ProxyIpEndpoint)/proxy.pac?u={user}</span>
         </li>
         <li>
             <span>在手机访问此页面，</span> <a href="/cert/client.cer">点击下载安装证书</a><span>到手机端</span>
@@ -56,9 +56,9 @@
         <li>
             <span>客户端列表</span>
             <select id="ipAddress">
-                @foreach (var ip in Model.ClientsIp)
+                @foreach (var ui in Model.ClientsIp)
                 {
-                    <option>@ip</option>
+                    <option value="@ui.IpAddress" >@ui.User</option>
                 }
             </select>
             <a href="javascript:void(0)" onclick="viewClient();">监控</a>

@@ -12,6 +12,6 @@ namespace KingQuestionProxy
 
         public string WsIpEndpoint { get; set; }
 
-        public string[] ClientsIp { get; set; }
+        public  UserIpAddress[] ClientsIp { get; set; }
     }
 }

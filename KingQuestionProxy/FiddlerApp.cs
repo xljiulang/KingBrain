@@ -34,7 +34,9 @@ namespace KingQuestionProxy
         /// <returns></returns>
         public bool Start(HostControl hostControl)
         {
+            UserList.Init();
             KingProcesser.Init();
+         
             CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
             // 请求前
@@ -45,12 +47,14 @@ namespace KingQuestionProxy
 
                 // 首页重定向
                 var uri = new Uri(session.fullUrl);
+
                 if (uri.Port == AppConfig.ProxyPort || uri.Port == AppConfig.WsPort)
                 {
+                    session.RequestHeaders["ClientIpAddress"] = session.clientIP;
                     session.host = $"{uri.Host}:{ AppConfig.WsPort}";
                     AllSessions.Add(session);
                 }
-                else if (AppConfig.AllowProxy(uri.Host))
+                else if (AppConfig.AllowProxy(uri.Host) && UserList.IsAcceptIpAddress(session.clientIP))
                 {
                     AllSessions.Add(session);
                 }
