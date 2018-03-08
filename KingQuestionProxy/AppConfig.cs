@@ -13,6 +13,11 @@ namespace KingQuestionProxy
     public static class AppConfig
     {
         /// <summary>
+        /// 公网域名或ip
+        /// </summary>
+        public static readonly string Host = ConfigurationManager.AppSettings["Host");
+
+        /// <summary>
         /// 代理端口
         /// </summary>
         public static readonly int ProxyPort = int.Parse(ConfigurationManager.AppSettings["ProxyPort"]);

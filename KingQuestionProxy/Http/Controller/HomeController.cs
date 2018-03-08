@@ -183,19 +183,28 @@ namespace KingQuestionProxy
         /// <returns></returns>
         private string GetProxyHost()
         {
-            var ipArray = from i in NetworkInterface.GetAllNetworkInterfaces()
-                          where i.OperationalStatus == OperationalStatus.Up
-                          let address = i.GetIPProperties().UnicastAddresses
-                          select address.ToArray();
+            var host = AppConfig.Host;
+            if (string.IsNullOrEmpty(host) == true)
+            {
+                var ipArray = from i in NetworkInterface.GetAllNetworkInterfaces()
+                              where i.OperationalStatus == OperationalStatus.Up
+                              let address = i.GetIPProperties().UnicastAddresses
+                              select address.ToArray();
 
-            var networkIps = from ip in ipArray.SelectMany(item => item)
-                             where ip.DuplicateAddressDetectionState == DuplicateAddressDetectionState.Preferred
-                             where ip.PrefixOrigin == PrefixOrigin.Dhcp || ip.PrefixOrigin == PrefixOrigin.Manual
-                             where ip.SuffixOrigin == SuffixOrigin.OriginDhcp || ip.SuffixOrigin == SuffixOrigin.Manual
-                             select ip;
+                var networkIps = from ip in ipArray.SelectMany(item => item)
+                                 where ip.DuplicateAddressDetectionState == DuplicateAddressDetectionState.Preferred
+                                 where ip.PrefixOrigin == PrefixOrigin.Dhcp || ip.PrefixOrigin == PrefixOrigin.Manual
+                                 where ip.SuffixOrigin == SuffixOrigin.OriginDhcp || ip.SuffixOrigin == SuffixOrigin.Manual
+                                 select ip;
 
-            var networkIp = networkIps.LastOrDefault();
-            return networkIp == null ? this.Request.Url.Host : networkIp.Address.ToString();
+                var networkIp = networkIps.FirstOrDefault();
+                if (networkIp != null)
+                {
+                    host = networkIp.Address.ToString();
+                }
+            }
+
+            return host == null ? this.Request.Url.Host : host;
         }
     }
 }
