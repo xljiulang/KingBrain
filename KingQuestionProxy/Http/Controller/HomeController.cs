@@ -194,7 +194,7 @@ namespace KingQuestionProxy
                              where ip.SuffixOrigin == SuffixOrigin.OriginDhcp || ip.SuffixOrigin == SuffixOrigin.Manual
                              select ip;
 
-            var networkIp = networkIps.FirstOrDefault();
+            var networkIp = networkIps.LastOrDefault();
             return networkIp == null ? this.Request.Url.Host : networkIp.Address.ToString();
         }
     }
