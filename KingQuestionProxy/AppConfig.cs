@@ -15,7 +15,7 @@ namespace KingQuestionProxy
         /// <summary>
         /// 公网域名或ip
         /// </summary>
-        public static readonly string Host = ConfigurationManager.AppSettings["Host");
+        public static readonly string Host = ConfigurationManager.AppSettings["Host"];
 
         /// <summary>
         /// 代理端口
