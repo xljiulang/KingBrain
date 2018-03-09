@@ -34,9 +34,7 @@ namespace KingQuestionProxy
         /// <returns></returns>
         public bool Start(HostControl hostControl)
         {
-            UserList.Init();
-            KingProcesser.Init();
-         
+            KingProcesser.Init();         
             CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
             // 请求前

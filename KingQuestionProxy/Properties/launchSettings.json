@@ -1,8 +1,7 @@
 {
   "profiles": {
     "KingQuestionProxy": {
-      "commandName": "Project",
-      "commandLineArgs": "TestSearchEngine"
+      "commandName": "Project"
     }
   }
 }

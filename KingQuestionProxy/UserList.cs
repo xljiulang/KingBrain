@@ -25,37 +25,22 @@ namespace KingQuestionProxy
             var path = "Data";
             var filter = "userList.txt";
 
-            watcher = new FileSystemWatcher();
-            watcher.Path = path;
-            watcher.Filter = filter;
+            watcher = new FileSystemWatcher(path, filter);
             watcher.Changed += Watcher_Changed;
             watcher.EnableRaisingEvents = true;
-            watcher.IncludeSubdirectories = true;
-
-            watcher.NotifyFilter = NotifyFilters.Attributes
-                | NotifyFilters.CreationTime
-                | NotifyFilters.DirectoryName
-                | NotifyFilters.FileName
-                | NotifyFilters.LastAccess
-                | NotifyFilters.LastWrite
-                | NotifyFilters.Security
-                | NotifyFilters.Size;
 
             var users = File.ReadAllText(Path.Combine(path, filter))
                 .Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(user => new UserIpAddress { User = user });
 
             userIpAddressList.AddRange(users);
-            foreach (var ui in userIpAddressList)
-            {
-                Console.WriteLine("正在加载用户：" + ui);
-            }
         }
 
-        public static void Init()
-        {
-        }
-
+        /// <summary>
+        /// userList.txt变化后
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private static void Watcher_Changed(object sender, FileSystemEventArgs e)
         {
             lock (syncRoot)
@@ -68,7 +53,7 @@ namespace KingQuestionProxy
                         on u equals ui.User
                         into g
                         from item in g.DefaultIfEmpty()
-                        select item == null ? new UserIpAddress { User = u, IpAddress = default(string) } : item;
+                        select item ?? new UserIpAddress { User = u, IpAddress = default(string) };
 
                 var datas = q.ToArray();
                 userIpAddressList.Clear();
@@ -81,6 +66,10 @@ namespace KingQuestionProxy
             }
         }
 
+        /// <summary>
+        /// 获取所有用户和其ip
+        /// </summary>
+        /// <returns></returns>
         public static UserIpAddress[] GetUserIpAddress()
         {
             lock (syncRoot)
@@ -94,6 +83,11 @@ namespace KingQuestionProxy
             }
         }
 
+        /// <summary>
+        /// 检测客户端ip是否可以使用代理
+        /// </summary>
+        /// <param name="ipAddress">ip</param>
+        /// <returns></returns>
         public static bool IsAcceptIpAddress(string ipAddress)
         {
             lock (syncRoot)
@@ -102,6 +96,12 @@ namespace KingQuestionProxy
             }
         }
 
+        /// <summary>
+        /// 更新用户的ip
+        /// </summary>
+        /// <param name="user">用户</param>
+        /// <param name="ipAddress">ip</param>
+        /// <returns></returns>
         public static bool UpdateIpAddress(string user, string ipAddress)
         {
             lock (syncRoot)
