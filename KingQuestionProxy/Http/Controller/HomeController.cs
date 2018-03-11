@@ -34,12 +34,13 @@ namespace KingQuestionProxy
                 {
                     ProxyIpEndpoint = $"{proxyHost}:{AppConfig.ProxyPort}",
                     WsIpEndpoint = $"{proxyHost}:{AppConfig.WsPort}",
-                    ClientsIp = await db.UserIpAddress.ToArrayAsync()
+                    ClientsIp = await db.UserIpAddress.Where(item => item.IpAddress != null)
+                    .Select(item => item.FixIpAddress())
+                    .ToArrayAsync()
                 };
                 return this.View("Index", model);
             }
         }
-
 
         /// <summary>
         /// ws客户端页面

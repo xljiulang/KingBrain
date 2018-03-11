@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace KingQuestionProxy
@@ -38,6 +39,15 @@ namespace KingQuestionProxy
         public override string ToString()
         {
             return $"{Name} {IpAddress}";
+        }
+
+        public UserIpAddress FixIpAddress()
+        {
+            return new UserIpAddress
+            {
+                Name = this.Name,
+                IpAddress = this.IpAddress == null ? null : Regex.Match(this.IpAddress, @"\d+\.\d+\.\d+\.\d+").Value
+            };
         }
     }
 }
