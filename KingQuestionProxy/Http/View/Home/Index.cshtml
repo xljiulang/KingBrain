@@ -58,7 +58,7 @@
             <select id="ipAddress">
                 @foreach (var ui in Model.ClientsIp)
                 {
-                    <option value="@ui.IpAddress" >**@(ui.User.Substring(2))</option>
+                    <option value="@ui.IpAddress">@(ui.Name)</option>
                 }
             </select>
             <a href="javascript:void(0)" onclick="viewClient();">监控</a>

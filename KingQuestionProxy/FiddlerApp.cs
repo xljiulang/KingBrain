@@ -23,43 +23,34 @@ namespace KingQuestionProxy
     public class FiddlerApp : ServiceControl
     {
         /// <summary>
-        /// 所有会话的集合
-        /// </summary>
-        public static readonly SessionCollection AllSessions = new SessionCollection();
-
-        /// <summary>
         /// 启动服务
         /// </summary>
         /// <param name="hostControl"></param>
         /// <returns></returns>
         public bool Start(HostControl hostControl)
         {
-            KingProcesser.Init();         
+            KingProcesser.Init();
             CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 
             // 请求前
             FiddlerApplication.BeforeRequest += (session) =>
             {
-                Console.WriteLine($"{session.clientIP}->{session.fullUrl}");
-                session.bBufferResponse = true;
-
-                // 首页重定向
+                session.bBufferResponse = true;                
                 var uri = new Uri(session.fullUrl);
 
                 if (uri.Port == AppConfig.ProxyPort || uri.Port == AppConfig.WsPort)
                 {
                     session.RequestHeaders["ClientIpAddress"] = session.clientIP;
                     session.host = $"{uri.Host}:{ AppConfig.WsPort}";
-                    AllSessions.Add(session);
                 }
-                else if (AppConfig.AllowProxy(uri.Host) && UserList.IsAcceptIpAddress(session.clientIP))
+                else if (AppConfig.AllowProxy(uri.Host) == false)
                 {
-                    AllSessions.Add(session);
+                    session.Abort();
+                    Console.WriteLine($"拒绝代理：{session.clientIP}->{session.fullUrl}");
                 }
                 else
                 {
-                    Console.WriteLine($"拒绝了{session.clientIP}的连接");
-                    session.Abort();
+                    Console.WriteLine($"转发代理：{session.clientIP}->{session.fullUrl}");
                 }
             };
 

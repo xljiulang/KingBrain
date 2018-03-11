@@ -27,6 +27,11 @@ namespace KingQuestionProxy
         /// </summary>
         public DbSet<QuizAnswer> QuizAnswer { get; set; }
 
+        /// <summary>
+        /// 用户与ip
+        /// </summary>
+        public DbSet<UserIpAddress> UserIpAddress { get; set; }
+
 
         /// <summary>
         /// sqllite数据库上下文

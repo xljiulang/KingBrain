@@ -25,17 +25,19 @@ namespace KingQuestionProxy
         /// </summary>
         /// <returns></returns>
         [Route("/")]
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            var proxyHost = this.GetProxyHost();
-            var model = new IndexModel
+            using (var db = new SqlliteContext())
             {
-                ProxyIpEndpoint = $"{proxyHost}:{AppConfig.ProxyPort}",
-                WsIpEndpoint = $"{proxyHost}:{AppConfig.WsPort}",
-                ClientsIp = UserList.GetUserIpAddress()
-            };
-
-            return this.View("Index", model);
+                var proxyHost = this.GetProxyHost();
+                var model = new IndexModel
+                {
+                    ProxyIpEndpoint = $"{proxyHost}:{AppConfig.ProxyPort}",
+                    WsIpEndpoint = $"{proxyHost}:{AppConfig.WsPort}",
+                    ClientsIp = await db.UserIpAddress.ToArrayAsync()
+                };
+                return this.View("Index", model);
+            }
         }
 
 
@@ -124,19 +126,13 @@ namespace KingQuestionProxy
         /// </summary>
         /// <returns></returns>
         [Route("/Proxy.PAC")]
-        public ActionResult Proxy_PAC(string u)
+        public async Task<ActionResult> Proxy_PAC(string u)
         {
-            var userOk = false;
-            if (string.IsNullOrEmpty(u) == false)
-            {
-                var clientIp = Request.Headers.TryGet<string>("ClientIpAddress");
-                userOk = UserList.UpdateIpAddress(u, clientIp);
-                Console.WriteLine($"用户登录：{u} ip为{clientIp}");
-            }
-
+            var loginOk = await this.LoginAsync(u);
             var buidler = new StringBuilder();
+
             buidler.AppendLine("function FindProxyForURL(url, host){");
-            if (userOk == true)
+            if (loginOk == true)
             {
                 buidler.AppendLine($"    var proxy = 'PROXY {this.Request.Url.Host}:{AppConfig.ProxyPort}';");
                 foreach (var host in AppConfig.ProxyHosts)
@@ -150,6 +146,35 @@ namespace KingQuestionProxy
             var pacString = buidler.ToString();
             this.Response.ContentType = "application/x-ns-proxy-autoconfig";
             return Content(pacString);
+        }
+
+        /// <summary>
+        /// 异步登录
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private async Task<bool> LoginAsync(string name)
+        {
+            if (string.IsNullOrEmpty(name) == true)
+            {
+                return false;
+            }
+
+            using (var db = new SqlliteContext())
+            {
+                var userIpAddress = await db.UserIpAddress.FindAsync(name);
+                if (userIpAddress == null)
+                {
+                    return false;
+                }
+
+                var clientIp = Request.Headers.TryGet<string>("ClientIpAddress");
+                userIpAddress.IpAddress = clientIp;
+                await db.SaveChangesAsync();
+
+                Console.WriteLine($"用户登录：{name} ip为{clientIp}");
+                return true;
+            }
         }
 
         /// <summary>

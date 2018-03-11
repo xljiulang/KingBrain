@@ -55,7 +55,8 @@ namespace KingAnswerClient
                 if (gameAnswer.Index >= 0)
                 {
                     var delay = TimeSpan.FromMilliseconds(gameAnswer.DelayMilliseconds);
-                    await this.AutotapOptionsAsync(gameAnswer.Index, delay, TimeSpan.FromSeconds(0.5d));
+                    var next = TimeSpan.FromSeconds(0.3d);
+                    await this.AutotapOptionsAsync(gameAnswer.Index, delay, next, next, next, next, next, next);
                 }
                 else
                 {
@@ -67,7 +68,7 @@ namespace KingAnswerClient
             }
             else if (notify.Cmd == WsCmd.GameOver && this.autoContinue == true)
             {
-                await this.AutotapOptionsAsync(2, TimeSpan.FromSeconds(6d));
+                await this.AutotapOptionsAsync(2, TimeSpan.FromSeconds(10d));
                 await this.AutotapOptionsAsync(4, TimeSpan.FromSeconds(4d));
             }
         }

@@ -23,7 +23,7 @@ namespace KingQuestionProxy
         /// http和ws监听器
         /// </summary>
         private static readonly TcpListener listener = new TcpListener();
-        
+
         /// <summary>
         /// 王者数据处理器
         /// </summary>
@@ -110,11 +110,14 @@ namespace KingQuestionProxy
             // 改写响应结果
             if (AppConfig.ResponseAnswer == true && optionIndex > -1)
             {
+                var json = JsonConvert.SerializeObject(kingQuestion);
+                kingQuestion = JsonConvert.DeserializeObject<KingQuestion>(json);
                 var quizData = kingQuestion.data;
+
                 quizData.quiz = quizData.quiz + $" 老九提示：[{(char)('A' + optionIndex)}]";
                 quizData.options[optionIndex] = quizData.options[optionIndex] + " [√]";
 
-                var json = JsonConvert.SerializeObject(kingQuestion);
+                json = JsonConvert.SerializeObject(kingQuestion);
                 session.utilSetResponseBody(json);
             }
         }
@@ -166,19 +169,21 @@ namespace KingQuestionProxy
                 var best = Searcher.Search(kingQuestion);
                 if (best == null)
                 {
+                    Console.WriteLine($"找不到答案：{kingQuestion.data.quiz}");
                     return -1;
                 }
 
-
                 if (sqlLite.QuizAnswer.Any(item => item.Quiz == quiz) == false)
                 {
-                    sqlLite.QuizAnswer.Add(new QuizAnswer
+                    quizAnswer = new QuizAnswer
                     {
                         Answer = best.Option,
                         Quiz = quiz,
                         OptionsJson = JsonConvert.SerializeObject(kingQuestion.data.options)
-                    });
+                    };
+                    sqlLite.QuizAnswer.Add(quizAnswer);
                     sqlLite.SaveChanges();
+                    Console.WriteLine($"保存网络答案到db：{Environment.NewLine}{quizAnswer}");
                 }
                 return best.Index;
             }
@@ -199,15 +204,13 @@ namespace KingQuestionProxy
                 try
                 {
                     var ip = ws.Tag.Get("ip").ToString();
-                    Console.WriteLine($"转发数据到{ip}");
                     if (clientIp == ip || clientIp.Contains(ip))
                     {
                         ws.SendText(jsonResult);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Console.WriteLine(ex.Message);
                 }
             }
         }
@@ -241,6 +244,7 @@ namespace KingQuestionProxy
                 {
                     quizAnswer.Answer = context.GetAnswer(kingAnswer);
                     sqlLite.SaveChanges();
+                    Console.WriteLine($"更新正确答案到db：{Environment.NewLine}{quizAnswer}");
                 }
             }
         }
