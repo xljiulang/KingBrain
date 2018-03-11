@@ -34,10 +34,9 @@ namespace KingQuestionProxy
                 {
                     ProxyIpEndpoint = $"{proxyHost}:{AppConfig.ProxyPort}",
                     WsIpEndpoint = $"{proxyHost}:{AppConfig.WsPort}",
-                    ClientsIp = await db.UserIpAddress.Where(item => item.IpAddress != null)
-                    .Select(item => item.FixIpAddress())
-                    .ToArrayAsync()
+                    ClientsIp = await db.UserIpAddress.Where(item => item.IpAddress != null).ToArrayAsync()                 
                 };
+                model.ClientsIp = model.ClientsIp.Select(item => item.FixIpAddress()).ToArray();
                 return this.View("Index", model);
             }
         }
